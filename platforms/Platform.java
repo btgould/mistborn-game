@@ -11,7 +11,8 @@ import java.awt.geom.Rectangle2D;
 
 import java.util.ArrayList;
 
-import display.Display;
+//import to scale drawings
+//import display.Display;
 
 public class Platform {
 

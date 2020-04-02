@@ -26,7 +26,7 @@ public class Board extends JPanel {
 
     private final int INITIAL_DELAY = 100;
     //for debugging: increase delay between frames to read stat menu
-    private final int INTERVAL_DELAY = 1000 / 30 * 10;
+    private final int INTERVAL_DELAY = 1000 / 30;
 
     public Board() {
         initBoard();
@@ -71,7 +71,7 @@ public class Board extends JPanel {
 
         //for debug purposes
         //-----------------------------------------------------------------------------------------------
-        g.drawString("Keys Pressed: " + Player.setToString(Player.keysPressed), 10, 10);
+        g.drawString("Keys Pressed: " + Player.keysPressed, 10, 10);
         g.drawString("Player State: " + player.getState(), 10, 30);
 
         g.drawString("xPos: " + player.getXPos(), 10, 50);

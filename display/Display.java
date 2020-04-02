@@ -6,11 +6,11 @@ import platforms.Platform;
 
 import java.awt.EventQueue;
 
-import java.awt.event.ComponentAdapter;
+//imports for scaling drawings (future plans)
+/*import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-
 import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.awt.Toolkit;*/
 
 public class Display extends JFrame {
 
@@ -30,8 +30,9 @@ public class Display extends JFrame {
     private void initPlatforms() {
         //new Platform(xPos, yPos, width, height);
         new Platform(0, 300, 500, 50);
-        new Platform(250, 200, 50, 100);
+        //new Platform(250, 100, 50, 200);
         //new Platform(0, 100, 500, 50);
+        new Platform(0, 500, 1500, 50);
     }
 
     private void initUI() {
