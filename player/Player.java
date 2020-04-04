@@ -25,31 +25,37 @@ public class Player {
     private double width = 50;
     private double height = 100;
 
-    //this set of variables is used to tweak the feel of the movement
+    //used to tweak the feel of the movement
     private double gravity = 1; //amount that ySpeed is changed for every frame the player falls
-    private double airAcc = 0.5; //amount that xSpeed is changed for every frame the player moves in air
+    private double airAcc = 1; //amount that xSpeed is changed for every frame the player moves in air
     private double walkAcc = 1; //amount that xSpeed is changed for every frame the player walks
     private double runAcc = 1; //amount that xSpeed is changed for every frame the player runs
-    private double maxAirSpeed = 15; //max horiz airSpeed of player
+    private double maxAirSpeed; //max horiz airSpeed of player (set based on if player can run or not)
     private double maxWalkSpeed = 8; //max speed the player can walk
     private double maxRunSpeed = 15; //max speed the player can run
     private double friction = 0.8; //proportion of speed that remains per frame while sliding
     private double fullJumpSpeed = -17; //initial ySpeed when the player jumps
     private double shortJumpSpeed = -10; //ySpeed to set if the player releases jump early
-    
+    private double doubleJumpSpeed = -15; //initial ySpeed when the player double jumps
+    private double wallJumpYSpeed = -15; //initial ySpeed when the player wall jumps
+    private double wallJumpXSpeed = 6; //initial xSpeed away from wall when the player wall jumps
 
     private boolean canJump;
+    private boolean canDoubleJump;
+    private boolean jumpReleased;
 
-    // this set of bools is used to determine state.
-    // they are not equivalent to state, because player can be accelerating and
-    // falling, for example
+    // used to determine player state. not equivalent to state,
+    // because player can be accelerating and falling, for example
     //TODO: change visibility back to private after debugging finished
+    //including collided();
     public boolean accelerating;
     public boolean canRun;
     public boolean sliding;
 
     public boolean grounded;
     public boolean jumping;
+    public boolean doubleJumping;
+    public boolean wallJumping;
     public boolean falling;
     public boolean landing;
 
@@ -58,7 +64,7 @@ public class Player {
     public boolean wallPushing;
 
     private Side wallSide;
-    private Side wallJumpSide;
+    private Side lastWallJumpSide;
 
     private State state;
 
@@ -73,10 +79,15 @@ public class Player {
         switch (state) {
             case IDLE:
                 // assumptions from being in IDLE state
-                this.grounded = true;
-                this.crouching = false;
                 this.accelerating = false;
-                this.atWall = false;
+                this.sliding = false;
+                this.grounded = true;
+                this.jumping = false;
+                this.doubleJumping = false;
+                this.wallJumping = false;
+                this.falling = false;
+                this.crouching = false;
+                this.wallPushing = false;
 
                 // check if assumptions were true
                 checkForWalkAcc();
@@ -88,51 +99,58 @@ public class Player {
                     if (this.crouching) {
                         // grounded and crouching -> CROUCHING
                         this.state = State.CROUCHING;
-                    } else if (this.atWall) {
-                        // grounded, not crouching, at wall -> AT_WALL
+                    } else if (this.wallPushing) {
+                        // grounded, not crouching, wall pushing -> AT_WALL
                         this.state = State.AT_WALL;
                     } else if (this.accelerating) {
-                        // grounded, not crouching, not at wall, accelerating -> WALKING
+                        // grounded, not crouching, not wall pushing, accelerating -> WALKING
                         this.state = State.WALKING;
                     }
                 } else {
                     // not grounded -> JUMPING
                     this.state = State.JUMPING;
                 }
+                //grounded, not crouching, not wall pushing, not accelerating -> stay in IDLE
                 break;
 
+                //TODO: walking can go straight into idle if sliding state is never triggered (xSpeed = 1)
             case WALKING:
                 // assumptions from being in WALKING state
+                this.accelerating = true;
                 this.sliding = false;
                 this.grounded = true;
                 this.jumping = false;
+                this.doubleJumping = false;
+                this.wallJumping = false;
+                this.falling = false;
                 this.crouching = false;
-                this.atWall = false;
-                this.canRun = false;
+                this.wallPushing = false;
 
                 // check if assumptions were true
                 checkForWalkAcc();
-                checkForRun();
+                checkForRunAbility();
                 checkForJump();
                 checkForCrouch();
                 checkForFriction();
-                checkIfFalling();
+
+                // move
                 move();
                 checkForCollision();
+                checkIfFalling();
 
                 // determine next state
                 if (this.grounded) {
                     if (this.crouching) {
                         // grounded and crouching -> CROUCHING
                         this.state = State.CROUCHING;
-                    } else if (this.atWall) {
-                        // grounded, not crouching, at wall -> AT_WALL
+                    } else if (this.wallPushing) {
+                        // grounded, not crouching, wall pushing -> AT_WALL
                         this.state = State.AT_WALL;
                     } else if (this.sliding) {
-                        // grounded, not crouching, not at wall, sliding -> SLIDING
+                        // grounded, not crouching, not wall pushing, sliding -> SLIDING
                         this.state = State.SLIDING;
                     } else if (Math.abs(this.xSpeed) >= this.maxWalkSpeed && this.canRun) {
-                        // grounded, not crouching, not at wall, not sliding, speed >= 10 and canRun -> RUNNING
+                        // grounded, not crouching, not at wall, not sliding, speed >= max walk speed and can run -> RUNNING
                         this.state = State.RUNNING;
                     }
                 } else {
@@ -144,39 +162,47 @@ public class Player {
                         this.state = State.FALLING;
                     }
                 }
+                //grounded, not crouching, not at wall, not sliding, speed < max walk speed or cant run -> stay in WALKING
                 break;
 
             case RUNNING:
                 // assumptions from being in RUNNING state
+                this.accelerating = true;
                 this.sliding = false;
                 this.grounded = true;
                 this.jumping = false;
+                this.doubleJumping = false;
+                this.wallJumping = false;
+                this.falling = false;
                 this.crouching = false;
-                this.atWall = false;
-                this.canRun = true;
+                this.wallPushing = false;
 
                 // check if assumptions were true
                 checkForRunAcc();
-                checkForRun();
+                checkForRunAbility();
                 checkForJump();
                 checkForCrouch();
                 checkForFriction();
-                checkIfFalling();
+
+                //move
                 move();
                 checkForCollision();
+                checkIfFalling();
 
                 // determine next state
                 if (this.grounded) {
                     if (this.crouching) {
                         // grounded and crouching -> CROUCHING
                         this.state = State.CROUCHING;
-                    } else if (this.atWall) {
-                        // grounded, not crouching, at wall -> AT_WALL
+                    } else if (this.wallPushing) {
+                        // grounded, not crouching, wall pushing -> AT_WALL
                         this.state = State.AT_WALL;
                     } else if (this.sliding) {
-                        // grounded, not crouching, not at wall, sliding -> SLIDING
+                        // grounded, not crouching, not wall pushing, sliding -> SLIDING
                         this.state = State.SLIDING;
                     } else if (!this.canRun) {
+                        //TODO: should this also check for if speed < max walk speed?
+                        // grounded, not crouching, not wall pushing, not sliding, cant run -> WALKING
                         this.state = State.WALKING;
                     }
                 } else {
@@ -188,34 +214,43 @@ public class Player {
                         this.state = State.FALLING;
                     }
                 }
+                // grounded, not crouching, not wall pushing, not sliding, can run -> stay in RUNNING
                 break;
 
             case SLIDING:
                 // assumptions from being in SLIDING state
                 this.accelerating = false;
+                this.sliding = true;
                 this.grounded = true;
                 this.jumping = false;
+                this.doubleJumping = false;
+                this.wallJumping = false;
+                this.falling = false;
                 this.crouching = false;
-                this.atWall = false;
+                this.wallPushing = false;
 
                 // check if assumptions were true
                 checkForWalkAcc();
+                checkForRunAbility();
                 checkForJump();
                 checkForCrouch();
                 checkForFriction();
-                checkIfFalling();
+
+                //move
                 move();
                 checkForCollision();
+                checkIfFalling();
 
+                //determine next state
                 if (this.grounded) {
                     if (this.crouching) {
                         // grounded and crouching -> CROUCHING
                         this.state = State.CROUCHING;
-                    } else if (this.atWall) {
-                        // grounded, not crouching, at wall -> AT_WALL
+                    } else if (this.wallPushing) {
+                        // grounded, not crouching, wall pushing -> AT_WALL
                         this.state = State.AT_WALL;
                     } else if (this.accelerating) {
-                        // grounded, not crouching, not at wall, accelerating -> determine based on
+                        // grounded, not crouching, not wall pushing, accelerating -> determine based on
                         // speed & run ability
                         if (Math.abs(this.xSpeed) >= this.maxWalkSpeed && this.canRun) {
                             this.state = State.RUNNING;
@@ -223,7 +258,7 @@ public class Player {
                             this.state = State.WALKING;
                         }
                     } else if (this.xSpeed == 0) {
-                        // grounded, not crouching, not at wall, not accelerating, speed = 0 -> IDLE
+                        // grounded, not crouching, not wall pushing, not accelerating, speed = 0 -> IDLE
                         this.state = State.IDLE;
                     }
                 } else {
@@ -235,91 +270,216 @@ public class Player {
                         this.state = State.FALLING;
                     }
                 }
+                // grounded, not crouching, not wall pushing, not accelerating, speed != 0 -> stay in SLIDING
                 break;
 
             case JUMPING:
+                //assumptions from being in JUMPING state
+                this.sliding = false;
+                this.grounded = false;
+                this.jumping = true;
+                this.doubleJumping = false;
+                this.wallJumping = false;
+                this.falling = true;
+                this.crouching = false;
+                this.wallPushing = false;
 
-                checkForRun();
+                //check if assumptions were true
                 checkForAirAcc();
+                checkForRunAbility();
+                fall();
+
+                //move
                 move();
                 checkForCollision();
                 checkIfAtWall();
 
-                fall();
-
-                /*
-                 * if (keysPressed.contains(KeyEvent.VK_UP) && this.jumpHeightCount < 5) {
-                 * this.ySpeed = -12; this.jumpHeightCount++; } else { this.state =
-                 * State.FALLING; }
-                 */
-
-                if (!(keysPressed.contains(KeyEvent.VK_UP) && this.ySpeed < -10)) {
+                //determine next state
+                if (!keysPressed.contains(KeyEvent.VK_UP) || Math.abs(this.ySpeed) <= Math.abs(this.shortJumpSpeed)) {
                     this.ySpeed = this.shortJumpSpeed;
-                    this.state = State.FALLING;
+
+                    if (this.wallPushing) {
+                        //up not pressed or ySpeed too low, wall pushing -> WALL_FALLING
+                        this.state = State.WALL_FALLING;
+                    } else {
+                        //up not presses or ySpeed too low, not wall pushing -> FALLING
+                        this.state = State.FALLING;
+                    }
                 }
+                //up pressed, ySpeed higher than shortJumpSpeed -> stay in JUMPING
                 break;
 
             case DOUBLE_JUMPING:
-            
+                //TODO: make double jumping state last for more than one frame
+                //assumptions from being in DOUBLE_JUMPING state
+                this.sliding = false;
+                this.grounded = false;
+                this.jumping = false;
+                this.doubleJumping = true;
+                this.wallJumping = false;
+                this.falling = true;
+                this.crouching = false;
+                this.wallPushing = false;
+
+                //check if assumptions were true
+                checkForAirAcc();
+                checkForRunAbility();
+                fall();
+                
+                //move
+                move();
+                checkForCollision();
+                checkIfAtWall();
+
+                //determine next state
+                //TODO: can double jumping go into landing?
+                if (this.grounded) {
+                    //grounded -> LANDING
+                    this.state = State.LANDING;
+                } else if (this.wallPushing) {
+                    //not grounded, wallPushing -> WALL_FALLING
+                    this.state = State.WALL_FALLING;
+                } else {
+                    //not grounded, not wallPushing -> FALLING
+                    this.state = State.FALLING;
+                }
                 break;
 
             case FALLING:
                 // assumptions from being in FALLING state
-                this.landing = false;
-
-                fall();
+                this.sliding = false;
+                this.grounded = false;
+                this.jumping = false;
+                this.doubleJumping = false;
+                this.wallJumping = false;
+                this.falling = true;
+                this.crouching = false;
+                this.wallPushing = false;
 
                 // check if assumptions were true
-                checkForRun();
                 checkForAirAcc();
+                checkForRunAbility();
+                checkForDoubleJump();
+                fall();
+
+                //move
                 move();
                 checkForCollision();
                 checkIfAtWall();
 
                 // determine next state
-                if (this.wallPushing) {
-                    this.state = State.WALL_FALLING;
-                } else if (this.landing) {
+                if (this.grounded) {
+                    //grounded -> LANDING
                     this.state = State.LANDING;
-                }
+                } else if (this.doubleJumping) {
+                    //not grounded, double jumping -> DOUBLE_JUMPING
+                    this.state = State.DOUBLE_JUMPING;
+                } else if (this.wallPushing) {
+                    //not grounded, not double jumping, wall pushing -> WALL_FALLING
+                    this.state = State.WALL_FALLING;
+                } 
+                //not grounded, not double jumping, not wall pushing -> stay in FALLING
                 break;
 
             case WALL_FALLING:
                 // assumptions from being in WALL_FALLING state
-                this.landing = false;
-
-                fall();
+                this.accelerating = false;
+                this.sliding = false;
+                this.grounded = false;
+                this.jumping = false;
+                this.doubleJumping = false;
+                this.wallJumping = false;
+                this.falling = true;
+                this.crouching = false;
+                this.wallPushing = true;
 
                 // check if assumptions were true
-                checkForRun();
                 checkForAirAcc();
+                checkForRunAbility();
+                checkForWallJump();
+                checkForDoubleJump();
+                fall();
+
+                //move
                 move();
                 checkForCollision();
                 checkIfAtWall();
 
                 // determine next state
-                if (this.landing) {
+                if (this.grounded) {
+                    //grounded -> LANDING
                     this.state = State.LANDING;
-                } else  if (!this.wallPushing) {
+                } else if (this.wallJumping) {
+                    //not grounded, wall jumping -> WALL_JUMPING
+                    this.state = State.WALL_JUMPING;
+                } else if (this.doubleJumping) {
+                    //not grounded, not wall jumping, double jumping -> DOUBLE_JUMPING
+                    this.state = State.DOUBLE_JUMPING;
+                } else if (!this.wallPushing) {
+                    //not grounded, not wall jumping, not double jumping, not wall pushing -> FALLING
                     this.state = State.FALLING;
                 }
-
+                //not grounded, not wall jumping, not double jumping, wall pushing -> stay in WALL_FALLING
                 break;
 
             case WALL_JUMPING:
-            
+                //TODO: make wall jumping state last for more than one frame
+                //assumptions from being in WALL_JUMPING state
+                this.accelerating = true;
+                this.sliding = false;
+                this.grounded = false;
+                this.jumping = false;
+                this.doubleJumping = false;
+                this.wallJumping = true;
+                this.falling = true;
+                this.crouching = false;
+                this.wallPushing = false;
+
+                //check if assumptions were true
+                checkForAirAcc();
+                checkForRunAbility();
+                fall();
+
+                //move
+                move();
+                checkForCollision();
+                checkIfAtWall();
+
+                //determine next state
+                //TODO: can wall jumping go into landing or wall falling?
+                if (this.grounded) {
+                    //grounded -> LANDING
+                    this.state = State.LANDING;
+                } else if (this.wallPushing) {
+                    //not grounded, wallPushing -> WALL_FALLING
+                    this.state = State.WALL_FALLING;
+                } else {
+                    //not grounded, not wallPushing -> FALLING
+                    this.state = State.FALLING;
+                }
                 break;
 
             // TODO: make landing state last for more than one frame
             case LANDING:
                 // assumptions from being in LANDING state
+                this.accelerating = true;
                 this.sliding = false;
+                this.grounded = true;
+                this.jumping = false;
+                this.doubleJumping = false;
+                this.wallJumping = false;
+                this.falling = false;
+                this.crouching = false;
+                this.wallPushing = false;
 
                 // check if assumptions were true
                 checkForWalkAcc();
                 checkForFriction();
+
+                //move
                 move();
                 checkForCollision();
+                checkIfFalling();
 
                 // determine next state
                 if (this.sliding) {
@@ -335,22 +495,27 @@ public class Player {
                 }
                 break;
 
-            // TODO: actually change height when crouching, force crouch when in too small
-            // of a space
+            // TODO: actually change height when crouching, force crouch when space too small
             case CROUCHING:
                 // assumptions from being in CROUCHING state
                 this.accelerating = false;
+                this.sliding = true;
                 this.grounded = true;
+                this.jumping = false;
+                this.doubleJumping = false;
+                this.wallJumping = false;
+                this.falling = false;
                 this.crouching = true;
-                this.atWall = false;
+                this.wallPushing = false;
 
                 // check if assumptions were true
                 checkForCrouch();
-                checkForWalkAcc();
                 checkForFriction();
-                checkIfFalling();
+
+                //move
                 move();
                 checkForCollision();
+                checkIfFalling();
 
                 // determine next state
                 if (this.grounded) {
@@ -385,19 +550,26 @@ public class Player {
 
             case AT_WALL:
                 // assumptions from being in AT_WALL state
-                this.atWall = true;
-                this.grounded = true;
                 this.accelerating = false;
+                this.sliding = false;
+                this.grounded = true;
+                this.jumping = false;
+                this.doubleJumping = false;
+                this.wallJumping = false;
+                this.falling = false;
                 this.crouching = false;
+                this.wallPushing = true;
 
                 // check if assumptions are true
                 checkForWalkAcc();
                 checkForJump();
                 checkForCrouch();
                 checkForFriction();
-                checkIfFalling();
+
+                //move
                 move();
                 checkForCollision();
+                checkIfFalling();
                 checkIfAtWall();
 
                 // determine next state
@@ -417,9 +589,8 @@ public class Player {
                     // not grounded -> JUMPING
                     this.state = State.JUMPING;
                 }
-
+                //grounded, not crouching, not accelerating, wallPushing -> stay in AT_WALL
                 break;
-            
         }
     }
 
@@ -538,7 +709,7 @@ public class Player {
         }
     }
 
-    private void checkForRun() {
+    private void checkForRunAbility() {
         if (keysPressed.contains(KeyEvent.VK_SHIFT)) {
             this.canRun = true;
         } else {
@@ -565,11 +736,45 @@ public class Player {
         if (keysPressed.contains(KeyEvent.VK_UP) && this.canJump == true) {
             this.ySpeed = this.fullJumpSpeed;
 
+            this.jumpReleased = false;
             this.canJump = false;
             this.grounded = false;
             this.falling = true;
             this.jumping = true;
+
+            this.lastWallJumpSide = Side.NONE;
         }
+    }
+
+    private void checkForDoubleJump() {
+        if (!keysPressed.contains(KeyEvent.VK_UP)) {
+            this.jumpReleased = true;
+        }
+
+        if (this.jumpReleased && keysPressed.contains(KeyEvent.VK_UP) && this.canDoubleJump && !this.wallJumping) {
+            this.ySpeed = this.doubleJumpSpeed;
+
+            this.canDoubleJump = false;
+            this.doubleJumping = true;
+        }
+    }
+
+    private void checkForWallJump() {
+        if (keysPressed.contains(KeyEvent.VK_UP) && this.wallPushing && this.wallSide != this.lastWallJumpSide) {
+            this.ySpeed = this.wallJumpYSpeed;
+            this.jumpReleased = false;
+
+            if (this.wallSide == Side.RIGHT) {
+                this.xSpeed = -1 * this.wallJumpXSpeed;
+            } else if (this.wallSide == Side.LEFT) {
+                this.xSpeed = this.wallJumpXSpeed;
+            }
+
+            this.lastWallJumpSide = this.wallSide;
+
+            this.wallJumping = true;
+        }
+
     }
 
     private void checkForCrouch() {
@@ -582,6 +787,7 @@ public class Player {
 
     private void checkIfFalling() {
         this.yPos++;
+
         if (!collided()) {
             this.falling = true;
             this.canJump = false;
@@ -639,7 +845,10 @@ public class Player {
         return false;
     }
 
-    //TODO: colliding with roof works weirdly
+    //TODO: collision bugs
+    //colliding with roof works weirdly
+    //can sometimes get stuck in falling state if I hit a wall as I am about to land
+    //can sometimes jump forever if I jump as I am about to land and hit a wall
     private void checkForCollision() {
         if (collided()) {
             double slope  = Math.abs(this.ySpeed / this.xSpeed);
@@ -647,7 +856,6 @@ public class Player {
             double xOffset = 0;
             double yOffset = 0;
 
-            //xOffset < Math.abs(this.xSpeed) || yOffset < Math.abs(this.ySpeed)
             while (collided()) {
                 if (xOffset == 0 && yOffset == 0) {
                     if (Math.abs(this.ySpeed) > Math.abs(this.xSpeed)) {
@@ -665,6 +873,7 @@ public class Player {
                             if (this.ySpeed > 0) {
                                 this.grounded = true;
                                 this.canJump = true;
+                                this.canDoubleJump = true;
                                 this.falling = false;
                                 this.landing = true;
                             }
@@ -733,6 +942,7 @@ public class Player {
                         if (this.ySpeed > 0) {
                             this.grounded = true;
                             this.canJump = true;
+                            this.canDoubleJump = true;
                             this.falling = false;
                             this.landing = true;
                         }
@@ -816,7 +1026,9 @@ public class Player {
             break;
 
             case DOUBLE_JUMPING:
-                //TODO: add drawing methods for new cases (double jumping, wall falling, wall jumping)
+                Rectangle2D doubleJumping = new Rectangle2D.Double(0D, 0D, this.width, this.height);
+
+                g2d.draw(at.createTransformedShape(doubleJumping));
             break;
 
             case FALLING:
@@ -832,7 +1044,9 @@ public class Player {
             break;
 
             case WALL_JUMPING:
+                Rectangle2D wallJumping = new Rectangle2D.Double(0D, 0D, this.width, this.height);
 
+                g2d.draw(at.createTransformedShape(wallJumping));
             break;
 
             case LANDING:

@@ -30,7 +30,7 @@ public class Display extends JFrame {
     private void initPlatforms() {
         //new Platform(xPos, yPos, width, height);
         new Platform(0, 300, 500, 50);
-        //new Platform(250, 100, 50, 200);
+        new Platform(250, 100, 50, 200);
         //new Platform(0, 100, 500, 50);
         new Platform(0, 500, 1500, 50);
     }
