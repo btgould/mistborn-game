@@ -86,7 +86,6 @@ public class Board extends JPanel {
         g.drawString("Grounded: " + player.grounded, 200, 50);
         g.drawString("Jumping: " + player.jumping, 200, 70);
         g.drawString("Falling: " + player.falling, 200, 90);
-        g.drawString("Landing: " + player.landing, 200, 110);
         g.drawString("Crouching: " + player.crouching, 200, 130);
         g.drawString("At Wall: " + player.atWall, 200, 150);
         g.drawString("Wall pushing: " + player.wallPushing, 200, 170);

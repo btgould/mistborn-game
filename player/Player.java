@@ -17,8 +17,8 @@ import java.awt.event.KeyEvent;
 
 public class Player {
 
-    private int xPos = 0;
-    private int yPos = 190;
+    private double xPos = 0;
+    private double yPos = 190;
     private double xSpeed = 0;
     private double ySpeed = 0;
 
@@ -27,7 +27,7 @@ public class Player {
 
     //used to tweak the feel of the movement
     private double gravity = 1; //amount that ySpeed is changed for every frame the player falls
-    private double airAcc = 1; //amount that xSpeed is changed for every frame the player moves in air
+    private double airAcc = 0.5; //amount that xSpeed is changed for every frame the player moves in air
     private double walkAcc = 1; //amount that xSpeed is changed for every frame the player walks
     private double runAcc = 1; //amount that xSpeed is changed for every frame the player runs
     private double maxAirSpeed; //max horiz airSpeed of player (set based on if player can run or not)
@@ -57,7 +57,6 @@ public class Player {
     public boolean doubleJumping;
     public boolean wallJumping;
     public boolean falling;
-    public boolean landing;
 
     public boolean crouching;
     public boolean atWall;
@@ -94,6 +93,11 @@ public class Player {
                 checkForJump();
                 checkForCrouch();
 
+                // move
+                move();
+                checkForCollision();
+                checkIfFalling();
+
                 // determine next state
                 if (this.grounded) {
                     if (this.crouching) {
@@ -107,13 +111,17 @@ public class Player {
                         this.state = State.WALKING;
                     }
                 } else {
-                    // not grounded -> JUMPING
-                    this.state = State.JUMPING;
+                    if (this.jumping) {
+                        // not grounded, jumping -> JUMPING
+                        this.state = State.JUMPING;
+                    } else {
+                        // not grounded, not jumping -> FALLING
+                        this.state = State.FALLING;
+                    }
                 }
                 //grounded, not crouching, not wall pushing, not accelerating -> stay in IDLE
                 break;
 
-                //TODO: walking can go straight into idle if sliding state is never triggered (xSpeed = 1)
             case WALKING:
                 // assumptions from being in WALKING state
                 this.accelerating = true;
@@ -150,8 +158,12 @@ public class Player {
                         // grounded, not crouching, not wall pushing, sliding -> SLIDING
                         this.state = State.SLIDING;
                     } else if (Math.abs(this.xSpeed) >= this.maxWalkSpeed && this.canRun) {
-                        // grounded, not crouching, not at wall, not sliding, speed >= max walk speed and can run -> RUNNING
+                        // grounded, not crouching, not wall pushing, not sliding, speed >= max walk speed and can run -> RUNNING
                         this.state = State.RUNNING;
+                    } else if (this.xSpeed == 0) {
+                        //grounded, not crouching, not wall pushing, not sliding, speed = 0 -> IDLE
+                        //needed because otherwise if xSpeed = 1 when released, checkForFriction sets sliding to false
+                        this.state = State.IDLE;
                     }
                 } else {
                     if (this.jumping) {
@@ -756,11 +768,16 @@ public class Player {
 
             this.canDoubleJump = false;
             this.doubleJumping = true;
+            this.jumpReleased = false;
         }
     }
 
     private void checkForWallJump() {
-        if (keysPressed.contains(KeyEvent.VK_UP) && this.wallPushing && this.wallSide != this.lastWallJumpSide) {
+        if (!keysPressed.contains(KeyEvent.VK_UP)) {
+            this.jumpReleased = true;
+        }
+
+        if (keysPressed.contains(KeyEvent.VK_UP) && this.wallPushing && this.wallSide != this.lastWallJumpSide && this.jumpReleased) {
             this.ySpeed = this.wallJumpYSpeed;
             this.jumpReleased = false;
 
@@ -798,14 +815,14 @@ public class Player {
     }
 
     private void checkIfAtWall() {
-        int side = 0;
+        Side sideChecked = Side.NONE;
 
         if (this.wallSide == Side.RIGHT) {
             this.xPos++;
-            side = 1;
+            sideChecked = Side.RIGHT;
         } else if (this.wallSide == Side.LEFT) {
             this.xPos--;
-            side = -1;
+            sideChecked = Side.LEFT;
         }
 
         if (!collided()) {
@@ -813,9 +830,9 @@ public class Player {
             this.wallSide = Side.NONE;
         }
 
-        if (side == 1) {
+        if (sideChecked == Side.RIGHT) {
             this.xPos--;
-        } else if (side == -1) {
+        } else if (sideChecked == Side.LEFT) {
             this.xPos++;
         }
     }
@@ -847,8 +864,6 @@ public class Player {
 
     //TODO: collision bugs
     //colliding with roof works weirdly
-    //can sometimes get stuck in falling state if I hit a wall as I am about to land
-    //can sometimes jump forever if I jump as I am about to land and hit a wall
     private void checkForCollision() {
         if (collided()) {
             double slope  = Math.abs(this.ySpeed / this.xSpeed);
@@ -856,9 +871,28 @@ public class Player {
             double xOffset = 0;
             double yOffset = 0;
 
+            boolean causedByX = false;
+            boolean causedByY = false;
+
+            this.xPos -= this.xSpeed;
+            if (collided()) {
+                //collision caused by y movement
+                causedByY = true;
+            }
+            this.xPos += this.xSpeed;
+            this.yPos -= this.ySpeed;
+            if (collided()) {
+                //collision caused by x movement
+                causedByX = true;
+            }
+            this.yPos += this.ySpeed;
+
+            this.xPos = Math.round(this.xPos);
+            this.yPos = Math.round(this.yPos);
+
             while (collided()) {
                 if (xOffset == 0 && yOffset == 0) {
-                    if (Math.abs(this.ySpeed) > Math.abs(this.xSpeed)) {
+                    if (slope >= 1) {
                         //tick y
                         if (this.ySpeed > 0) {
                             this.yPos--;
@@ -867,20 +901,6 @@ public class Player {
                         }
     
                         yOffset++;
-        
-                        if (!collided()) {
-
-                            if (this.ySpeed > 0) {
-                                this.grounded = true;
-                                this.canJump = true;
-                                this.canDoubleJump = true;
-                                this.falling = false;
-                                this.landing = true;
-                            }
-    
-                            this.ySpeed = 0;
-                            break;
-                        }
                     } else {
                         //works b/c both cannot be 0, or player would never collide
                         //tick x
@@ -891,19 +911,6 @@ public class Player {
                         }
     
                         xOffset++;
-        
-                        if (!collided()) {
-                            this.atWall = true;
-    
-                            if (this.xSpeed > 0) {
-                                this.wallSide = Side.RIGHT;
-                            } else if (this.xSpeed < 0) {
-                                this.wallSide = Side.LEFT;
-                            }
-    
-                            this.xSpeed = 0;
-                            break;
-                        }
                     }
                 } else if (yOffset / xOffset >= slope) {
                     //tick x
@@ -914,19 +921,6 @@ public class Player {
                     }
 
                     xOffset++;
-    
-                    if (!collided()) {
-                        this.atWall = true;
-
-                        if (this.xSpeed > 0) {
-                            this.wallSide = Side.RIGHT;
-                        } else if (this.xSpeed < 0) {
-                            this.wallSide = Side.LEFT;
-                        }
-
-                        this.xSpeed = 0;
-                        break;
-                    }
                 } else {
                     //tick y
                     if (this.ySpeed > 0) {
@@ -936,21 +930,33 @@ public class Player {
                     }
 
                     yOffset++;
-    
-                    if (!collided()) {
-
-                        if (this.ySpeed > 0) {
-                            this.grounded = true;
-                            this.canJump = true;
-                            this.canDoubleJump = true;
-                            this.falling = false;
-                            this.landing = true;
-                        }
-
-                        this.ySpeed = 0;
-                        break;
-                    }
                 }
+            }
+
+            if (causedByY) {
+                //player hit a floor or a ceiling
+                if (this.ySpeed > 0) {
+                    this.grounded = true;
+                    this.canJump = true;
+                    this.canDoubleJump = true;
+                    this.lastWallJumpSide = Side.NONE;
+                    this.falling = false;
+                }
+
+                this.ySpeed = 0;
+            }
+
+            if (causedByX) {
+                //player hit a wall
+                this.atWall = true;
+    
+                if (this.xSpeed > 0) {
+                    this.wallSide = Side.RIGHT;
+                } else if (this.xSpeed < 0) {
+                    this.wallSide = Side.LEFT;
+                }
+    
+                this.xSpeed = 0;
             }
         }
     }
