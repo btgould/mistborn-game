@@ -17,7 +17,7 @@ import java.awt.event.KeyEvent;
 
 public class Player {
 
-    private double xPos = 0;
+    private double xPos = 350;
     private double yPos = 190;
     private double xSpeed = 0;
     private double ySpeed = 0;
@@ -38,7 +38,7 @@ public class Player {
     private double shortJumpSpeed = -10; //ySpeed to set if the player releases jump early
     private double doubleJumpSpeed = -15; //initial ySpeed when the player double jumps
     private double wallJumpYSpeed = -15; //initial ySpeed when the player wall jumps
-    private double wallJumpXSpeed = 6; //initial xSpeed away from wall when the player wall jumps
+    private double wallJumpXSpeed = 10; //initial xSpeed away from wall when the player wall jumps
 
     private boolean canJump;
     private boolean canDoubleJump;

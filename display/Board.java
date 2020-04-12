@@ -89,5 +89,8 @@ public class Board extends JPanel {
         g.drawString("Crouching: " + player.crouching, 200, 130);
         g.drawString("At Wall: " + player.atWall, 200, 150);
         g.drawString("Wall pushing: " + player.wallPushing, 200, 170);
+
+        g.drawString("xScale: " + Display.xScale, 400, 10);
+        g.drawString("yScale: " + Display.yScale, 400, 30);
     }
 }
