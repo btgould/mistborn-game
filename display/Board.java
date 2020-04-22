@@ -81,16 +81,13 @@ public class Board extends JPanel {
 
         g.drawString("Collided: " + player.collided(), 10, 130);
 
-        g.drawString("Accelerating: " + player.accelerating, 200, 10);
-        g.drawString("Sliding: " + player.sliding, 200, 30);
-        g.drawString("Grounded: " + player.grounded, 200, 50);
-        g.drawString("Jumping: " + player.jumping, 200, 70);
-        g.drawString("Falling: " + player.falling, 200, 90);
-        g.drawString("Crouching: " + player.crouching, 200, 130);
-        g.drawString("At Wall: " + player.atWall, 200, 150);
-        g.drawString("Wall pushing: " + player.wallPushing, 200, 170);
-
-        g.drawString("xScale: " + Display.xScale, 400, 10);
-        g.drawString("yScale: " + Display.yScale, 400, 30);
+        g.drawString("Accelerating: " + player.isAccelerating(), 200, 10);
+        g.drawString("Sliding: " + player.isSliding(), 200, 30);
+        g.drawString("Grounded: " + player.isGrounded(), 200, 50);
+        g.drawString("Jumping: " + player.isJumping(), 200, 70);
+        g.drawString("Falling: " + player.isFalling(), 200, 90);
+        g.drawString("Crouching: " + player.isCrouching(), 200, 110);
+        g.drawString("At Wall: " + player.isAtWall(), 200, 130);
+        g.drawString("Wall pushing: " + player.isWallPushing(), 200, 150);
     }
 }

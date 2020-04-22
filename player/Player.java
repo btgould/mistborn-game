@@ -48,19 +48,19 @@ public class Player {
     // because player can be accelerating and falling, for example
     //TODO: change visibility back to private after debugging finished
     //including collided();
-    public boolean accelerating;
-    public boolean canRun;
-    public boolean sliding;
+    private boolean accelerating;
+    private boolean canRun;
+    private boolean sliding;
 
-    public boolean grounded;
-    public boolean jumping;
-    public boolean doubleJumping;
-    public boolean wallJumping;
-    public boolean falling;
+    private boolean grounded;
+    private boolean jumping;
+    private boolean doubleJumping;
+    private boolean wallJumping;
+    private boolean falling;
 
-    public boolean crouching;
-    public boolean atWall;
-    public boolean wallPushing;
+    private boolean crouching;
+    private boolean atWall;
+    private boolean wallPushing;
 
     private Side wallSide;
     private Side lastWallJumpSide;
@@ -160,7 +160,7 @@ public class Player {
                     } else if (Math.abs(this.xSpeed) >= this.maxWalkSpeed && this.canRun) {
                         // grounded, not crouching, not wall pushing, not sliding, speed >= max walk speed and can run -> RUNNING
                         this.state = State.RUNNING;
-                    } else if (this.xSpeed == 0) {
+                    } else if (this.xSpeed == 0 && !this.accelerating) {
                         //grounded, not crouching, not wall pushing, not sliding, speed = 0 -> IDLE
                         //needed because otherwise if xSpeed = 1 when released, checkForFriction sets sliding to false
                         this.state = State.IDLE;
@@ -534,12 +534,12 @@ public class Player {
                     if (this.crouching) {
                         // grounded, crouching -> CROUCHING
                         this.state = State.CROUCHING;
-                    } else if (this.atWall) {
-                        // grounded, not crouching, at wall -> AT_WALL
+                    } else if (this.wallPushing) {
+                        // grounded, not crouching, wall pushing -> AT_WALL
                         this.state = State.AT_WALL;
                     } else {
                         if (this.accelerating) {
-                            // grounded, not at a wall, not crouching, and accelerating -> set based on
+                            // grounded, not wall pushing, not crouching, and accelerating -> set based on
                             // speed & run ability
                             if (Math.abs(this.xSpeed) >= this.maxWalkSpeed && this.canRun) {
                                 this.state = State.RUNNING;
@@ -547,10 +547,10 @@ public class Player {
                                 this.state = State.WALKING;
                             }
                         } else if (this.xSpeed == 0) {
-                            // grounded, not at wall, not crouching, not accelerating, speed = 0 -> IDLE
+                            // grounded, not wall pushing, not crouching, not accelerating, speed = 0 -> IDLE
                             this.state = State.IDLE;
                         } else {
-                            // grounded, not at wall, not crouching, not accelerating, speed != 0 -> SLIDING
+                            // grounded, not wall pushing, not crouching, not accelerating, speed != 0 -> SLIDING
                             this.state = State.SLIDING;
                         }
                     }
@@ -864,12 +864,16 @@ public class Player {
 
     //TODO: collision bugs
     //colliding with roof works weirdly
+    //can occasionally jump to top of a wall by colliding weirldly with floor
     private void checkForCollision() {
         if (collided()) {
             double slope  = Math.abs(this.ySpeed / this.xSpeed);
 
             double xOffset = 0;
             double yOffset = 0;
+
+            int xTickAmount = (this.xSpeed > 0) ? -1 : 1;
+            int yTickAmount = (this.ySpeed > 0) ? -1 : 1;
 
             boolean causedByX = false;
             boolean causedByY = false;
@@ -887,48 +891,32 @@ public class Player {
             }
             this.yPos += this.ySpeed;
 
-            this.xPos = Math.round(this.xPos);
-            this.yPos = Math.round(this.yPos);
-
+            if (causedByX) {
+                this.xPos = Math.round(this.xPos);
+            }
+            if (causedByY) {
+                this.yPos = Math.round(this.yPos);
+            }
+            
             while (collided()) {
                 if (xOffset == 0 && yOffset == 0) {
                     if (slope >= 1) {
                         //tick y
-                        if (this.ySpeed > 0) {
-                            this.yPos--;
-                        } else if (this.ySpeed < 0) {
-                            this.yPos++;
-                        }
-    
+                        this.yPos += yTickAmount;
                         yOffset++;
                     } else {
                         //works b/c both cannot be 0, or player would never collide
                         //tick x
-                        if (this.xSpeed > 0) {
-                            this.xPos--;
-                        } else if (this.xSpeed < 0) {
-                            this.xPos++;
-                        }
-    
+                        this.xPos += xTickAmount;
                         xOffset++;
                     }
                 } else if (yOffset / xOffset >= slope) {
                     //tick x
-                    if (this.xSpeed > 0) {
-                        this.xPos--;
-                    } else if (this.xSpeed < 0) {
-                        this.xPos++;
-                    }
-
+                    this.xPos += xTickAmount;
                     xOffset++;
                 } else {
                     //tick y
-                    if (this.ySpeed > 0) {
-                        this.yPos--;
-                    } else if (this.ySpeed < 0) {
-                        this.yPos++;
-                    }
-
+                    this.yPos += yTickAmount;
                     yOffset++;
                 }
             }
@@ -1079,7 +1067,7 @@ public class Player {
 
     }
 
-    //debug methods
+    //getters / setters
     //-----------------------------------------------------------------------------------------------
     public String getXPos() {
         return Double.toString(this.xPos);
@@ -1098,7 +1086,94 @@ public class Player {
     }
 
     public String getState() {
-
         return this.state.toString();
+    }
+
+    public boolean isAccelerating() {
+        return accelerating;
+    }
+
+    public void setAccelerating(boolean accelerating) {
+        this.accelerating = accelerating;
+    }
+
+    public boolean getCanRun() {
+        return canRun;
+    }
+
+    public void setCanRun(boolean canRun) {
+        this.canRun = canRun;
+    }
+
+    public boolean isSliding() {
+        return sliding;
+    }
+
+    public void setSliding(boolean sliding) {
+        this.sliding = sliding;
+    }
+
+    public boolean isGrounded() {
+        return grounded;
+    }
+
+    public void setGrounded(boolean grounded) {
+        this.grounded = grounded;
+    }
+
+    public boolean isJumping() {
+        return jumping;
+    }
+
+    public void setJumping(boolean jumping) {
+        this.jumping = jumping;
+    }
+
+    public boolean isDoubleJumping() {
+        return doubleJumping;
+    }
+
+    public void setDoubleJumping(boolean doubleJumping) {
+        this.doubleJumping = doubleJumping;
+    }
+
+    public boolean isWallJumping() {
+        return wallJumping;
+    }
+
+    public void setWallJumping(boolean wallJumping) {
+        this.wallJumping = wallJumping;
+    }
+
+    public boolean isFalling() {
+        return falling;
+    }
+
+    public void setFalling(boolean falling) {
+        this.falling = falling;
+    }
+
+    public boolean isCrouching() {
+        return crouching;
+    }
+
+    public void setCrouching(boolean crouching) {
+        this.crouching = crouching;
+    }
+
+    public boolean isAtWall() {
+        return atWall;
+    }
+
+    public void setAtWall(boolean atWall) {
+        this.atWall = atWall;
+    }
+
+    public boolean isWallPushing() {
+        return wallPushing;
+    }
+
+    public void setWallPushing(boolean wallPushing) {
+        this.wallPushing = wallPushing;
     }
 }
