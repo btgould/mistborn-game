@@ -872,8 +872,20 @@ public class Player {
             double xOffset = 0;
             double yOffset = 0;
 
-            int xTickAmount = (this.xSpeed > 0) ? -1 : 1;
-            int yTickAmount = (this.ySpeed > 0) ? -1 : 1;
+            int xTickAmount;
+            int yTickAmount;
+
+            if (this.xSpeed != 0) {
+                xTickAmount = (this.xSpeed > 0) ? -1 : 1;
+            } else {
+                xTickAmount = 0;
+            }
+
+            if (this.ySpeed != 0) {
+                yTickAmount = (this.ySpeed > 0) ? -1 : 1;
+            } else {
+                yTickAmount = 0;
+            }
 
             boolean causedByX = false;
             boolean causedByY = false;
