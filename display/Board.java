@@ -9,17 +9,18 @@ import levels.Platform;
 import player.KeyTracker;
 import player.MouseTracker;
 
-
-
 //drawing imports
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Color;
-
+import java.util.ArrayList;
 //animation imports
 import java.util.Timer;
 import java.util.TimerTask;
 import java.awt.Toolkit;
+
+//imports to make a "level"
+import levels.*;
 
 import player.Player;
 
@@ -36,7 +37,18 @@ public class Board extends JPanel {
     //for debugging: increase delay between frames to read stat menu
     private final int INTERVAL_DELAY = 1000 / 30;
 
+    //TODO: find a better place to initialize
+    private Level level;
+    private ArrayList<Platform> platforms = new ArrayList<Platform>();
+    private ArrayList<Metal> metals = new ArrayList<Metal>();
+    private Painter painter = new Painter();
+
+
     public Board() {
+        initPlatforms();
+        initMetals();
+        level = new Level(this.player, this.platforms, this.metals);
+
         initBoard();
     }
 
@@ -52,6 +64,7 @@ public class Board extends JPanel {
 
         setFocusable(true);
 
+        //TODO: game freezes when minute changes
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new tickAnimation(), INITIAL_DELAY, INTERVAL_DELAY);
     }
@@ -65,23 +78,26 @@ public class Board extends JPanel {
         }
     }
 
+    private void initPlatforms() {
+        // new Platform(xPos, yPos, width, height);
+        // new Platform(0, 300, 500, 50);
+        this.platforms.add(new Platform(250, 100, 50, 500));
+        this.platforms.add(new Platform(450, 100, 50, 500));
+        // new Platform(0, 100, 500, 50);
+        this.platforms.add(new Platform(0, 500, 1500, 50));
+    }
+
+    private void initMetals() {
+        //new Metal(xPos, yPos);
+        this.metals.add(new Metal(350, 525));
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         //paint background
         super.paintComponent(g);
 
-        //paint character
-        player.drawShape(g);
-
-        //paint platforms
-        for (int i = 0; i < Platform.getPlatforms().size(); i++) {
-            Platform.getPlatforms().get(i).drawShape(g);
-        }
-
-        //paint metals
-        for (int i = 0; i < Metal.getMetals().size(); i++) {
-            Metal.getMetals().get(i).drawShape(g);
-        }
+        painter.paintLevel(g, this.level);
 
         Toolkit.getDefaultToolkit().sync();
 

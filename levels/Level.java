@@ -12,8 +12,8 @@ public class Level {
     private ArrayList<Platform> platforms = new ArrayList<Platform>();
     private ArrayList<Metal> metals = new ArrayList<Metal>();
     
-    public Level(ArrayList<Platform> platforms, ArrayList<Metal> metals) {
-        setPlayer(new Player());
+    public Level(Player player, ArrayList<Platform> platforms, ArrayList<Metal> metals) {
+        setPlayer(player);
         setPlatforms(platforms);
         setMetals(metals);
     }

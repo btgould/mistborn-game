@@ -12,6 +12,7 @@ import levels.*;
 import player.Player;
 
 //TODO: paint only objects onscreen
+//TODO: add methods to paint menus
 public class Painter {
 
     public void paintLevel(Graphics g, Level level) {

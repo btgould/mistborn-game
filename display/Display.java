@@ -2,18 +2,12 @@ package display;
 
 //imports needed for swing
 import javax.swing.JFrame;
-
-import levels.Metal;
-
 import java.awt.EventQueue; //b/c swing not thread safe
 
 //imports to keep track of screen size
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-
-//imports to make a "level"
-import levels.Platform;
 
 public class Display extends JFrame {
 
@@ -25,25 +19,11 @@ public class Display extends JFrame {
     public double scale;
 
     private Display() {
-        initPlatforms();
-        initMetals();
         initUI();
     }
 
-    private void initPlatforms() {
-        // new Platform(xPos, yPos, width, height);
-        // new Platform(0, 300, 500, 50);
-        new Platform(250, 100, 50, 500);
-        new Platform(450, 100, 50, 500);
-        // new Platform(0, 100, 500, 50);
-        new Platform(0, 500, 1500, 50);
-    }
-
-    private void initMetals() {
-        //new Metal(xPos, yPos);
-        new Metal(350, 525);
-    }
-
+    //initialization
+    //---------------------------------------------------------------------------------------------------
     private void initUI() {
         Board board = new Board();
         add(board);
