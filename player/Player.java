@@ -9,8 +9,7 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
-import java.util.HashSet;
-
+import metals.Metal;
 import platforms.Platform;
 
 import java.awt.event.KeyEvent;
@@ -67,7 +66,7 @@ public class Player {
 
     private State state;
 
-    public static HashSet<Integer> keysPressed = new HashSet<>();
+    private Metal targetedMetal;
 
     public Player() {
         this.state = State.IDLE;
@@ -307,7 +306,7 @@ public class Player {
                 checkIfAtWall();
 
                 //determine next state
-                if (!keysPressed.contains(KeyEvent.VK_UP) || Math.abs(this.ySpeed) <= Math.abs(this.shortJumpSpeed)) {
+                if (!KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) || Math.abs(this.ySpeed) <= Math.abs(this.shortJumpSpeed)) {
                     this.ySpeed = this.shortJumpSpeed;
 
                     if (this.wallPushing) {
@@ -612,7 +611,7 @@ public class Player {
         this.wallPushing = false;
 
         // speed up to the left
-        if (keysPressed.contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxWalkSpeed && !this.crouching) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxWalkSpeed && !this.crouching) {
             if (this.wallSide == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -625,7 +624,7 @@ public class Player {
         }
 
         // speed up to the right
-        if (keysPressed.contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxWalkSpeed && !this.crouching) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxWalkSpeed && !this.crouching) {
             if (this.wallSide == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -664,7 +663,7 @@ public class Player {
         }
 
         // speed up to the left
-        if (keysPressed.contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxAirSpeed) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxAirSpeed) {
             if (this.wallSide == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -677,7 +676,7 @@ public class Player {
         }
 
         // speed up to the right
-        if (keysPressed.contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxAirSpeed) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxAirSpeed) {
             if (this.wallSide == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -695,7 +694,7 @@ public class Player {
         this.wallPushing = false;
 
         // speed up to the left
-        if (keysPressed.contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxRunSpeed && !this.crouching) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxRunSpeed && !this.crouching) {
             if (this.wallSide == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -708,7 +707,7 @@ public class Player {
         }
 
         // speed up to the right
-        if (keysPressed.contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxRunSpeed && !this.crouching) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxRunSpeed && !this.crouching) {
             if (this.wallSide == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -722,7 +721,7 @@ public class Player {
     }
 
     private void checkForRunAbility() {
-        if (keysPressed.contains(KeyEvent.VK_SHIFT)) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_SHIFT)) {
             this.canRun = true;
         } else {
             this.canRun = false;
@@ -730,7 +729,7 @@ public class Player {
     }
 
     private void checkForFriction() {
-        if ((!(keysPressed.contains(KeyEvent.VK_RIGHT)) && !(keysPressed.contains(KeyEvent.VK_LEFT)))
+        if ((!(KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT)) && !(KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT)))
                 || this.state == State.CROUCHING) {
             this.xSpeed *= this.friction;
 
@@ -745,7 +744,7 @@ public class Player {
 
     private void checkForJump() {
         // jump
-        if (keysPressed.contains(KeyEvent.VK_UP) && this.canJump == true) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canJump == true) {
             this.ySpeed = this.fullJumpSpeed;
 
             this.jumpReleased = false;
@@ -759,11 +758,11 @@ public class Player {
     }
 
     private void checkForDoubleJump() {
-        if (!keysPressed.contains(KeyEvent.VK_UP)) {
+        if (!KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)) {
             this.jumpReleased = true;
         }
 
-        if (this.jumpReleased && keysPressed.contains(KeyEvent.VK_UP) && this.canDoubleJump && !this.wallJumping) {
+        if (this.jumpReleased && KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canDoubleJump && !this.wallJumping) {
             this.ySpeed = this.doubleJumpSpeed;
 
             this.canDoubleJump = false;
@@ -773,11 +772,11 @@ public class Player {
     }
 
     private void checkForWallJump() {
-        if (!keysPressed.contains(KeyEvent.VK_UP)) {
+        if (!KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)) {
             this.jumpReleased = true;
         }
 
-        if (keysPressed.contains(KeyEvent.VK_UP) && this.wallPushing && this.wallSide != this.lastWallJumpSide && this.jumpReleased) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.wallPushing && this.wallSide != this.lastWallJumpSide && this.jumpReleased) {
             this.ySpeed = this.wallJumpYSpeed;
             this.jumpReleased = false;
 
@@ -795,7 +794,7 @@ public class Player {
     }
 
     private void checkForCrouch() {
-        if (keysPressed.contains(KeyEvent.VK_DOWN) && this.grounded == true) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_DOWN) && this.grounded == true) {
             this.crouching = true;
         } else {
             this.crouching = false;
@@ -840,16 +839,20 @@ public class Player {
     //returns true if overlapping with a platform
     public boolean collided() {
         //check every platform for collision
-        for (int platNum = 0; platNum < Platform.platforms.size(); platNum++) {
-            Platform platform  = Platform.platforms.get(platNum);
+        for (int platNum = 0; platNum < Platform.getPlatforms().size(); platNum++) {
+            Platform platform  = Platform.getPlatforms().get(platNum);
             boolean onSameX = false;
             boolean onSameY = false;
 
-            if (this.xPos + this.width  + 2 > platform.xPos && platform.xPos + platform.width  + 2 > this.xPos) {
+            if (this.xPos + this.width  + 2 > platform.getxPos() && platform.getxPos() + platform
+                    .getWidth()
+                    + 2 > this.xPos) {
                 onSameX = true;
             }
 
-            if (this.yPos + this.height  + 2 > platform.yPos && platform.yPos + platform.height  + 2 > this.yPos) {
+            if (this.yPos + this.height  + 2 > platform.getyPos() && platform.getyPos() + platform
+                    .getHeight()
+                    + 2 > this.yPos) {
                 onSameY = true;
             }
 
@@ -970,19 +973,6 @@ public class Player {
     private void move() {
         this.xPos += this.xSpeed;
         this.yPos += this.ySpeed;
-    }
-
-    // input methods
-    //-----------------------------------------------------------------------------------------------
-    public static void keyPressed(KeyEvent e) {
-        keysPressed.add(e.getKeyCode());
-    }
-
-    //note: must use Integer type b/c e.getKeyCode returns type int
-    //remove() is overloaded, and thinks that an argument of type int indicates the index of element to remove
-    //while an argument of type Integer makes it actually find an element of that value
-    public static void keyReleased(KeyEvent e) {
-        keysPressed.remove(new Integer(e.getKeyCode()));
     }
 
     //drawing methods

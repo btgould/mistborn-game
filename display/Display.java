@@ -2,6 +2,9 @@ package display;
 
 //imports needed for swing
 import javax.swing.JFrame;
+
+import metals.Metal;
+
 import java.awt.EventQueue; //b/c swing not thread safe
 
 //imports to keep track of screen size
@@ -23,6 +26,7 @@ public class Display extends JFrame {
 
     private Display() {
         initPlatforms();
+        initMetals();
         initUI();
     }
 
@@ -33,6 +37,11 @@ public class Display extends JFrame {
         new Platform(450, 100, 50, 500);
         // new Platform(0, 100, 500, 50);
         new Platform(0, 500, 1500, 50);
+    }
+
+    private void initMetals() {
+        //new Metal(xPos, yPos);
+        new Metal(350, 525);
     }
 
     private void initUI() {

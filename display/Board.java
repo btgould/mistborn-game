@@ -2,11 +2,19 @@ package display;
 
 import javax.swing.JPanel;
 
+import metals.Metal;
 import platforms.Platform;
+
+//event listening imports
+import player.KeyTracker;
+import player.MouseTracker;
+
+
 
 //drawing imports
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Color;
 
 //animation imports
 import java.util.Timer;
@@ -35,10 +43,16 @@ public class Board extends JPanel {
     private void initBoard() {
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
+        KeyTracker keyTracker = new KeyTracker();
+        MouseTracker mouseTracker = new MouseTracker();
+
         //TODO: for some reason, certain sets of three keys cant be registered at the same time
         //holding down any two keys ignores any key directly above either
         //works the same way in a word document, may just be how my computer works
-        addKeyListener(new KeyTracker());
+        addKeyListener(keyTracker);
+        addMouseListener(mouseTracker);
+        addMouseMotionListener(mouseTracker);
+
         setFocusable(true);
 
         Timer timer = new Timer();
@@ -63,15 +77,21 @@ public class Board extends JPanel {
         player.drawShape(g);
 
         //paint platforms
-        for (int i = 0; i < Platform.platforms.size(); i++) {
-            Platform.platforms.get(i).drawShape(g);
+        for (int i = 0; i < Platform.getPlatforms().size(); i++) {
+            Platform.getPlatforms().get(i).drawShape(g);
+        }
+
+        //paint metals
+        for (int i = 0; i < Metal.getMetals().size(); i++) {
+            Metal.getMetals().get(i).drawShape(g);
         }
 
         Toolkit.getDefaultToolkit().sync();
 
         //for debug purposes
         //-----------------------------------------------------------------------------------------------
-        g.drawString("Keys Pressed: " + Player.keysPressed, 10, 10);
+        g.setColor(Color.black);
+        g.drawString("Keys Pressed: " + KeyTracker.getKeysPressed(), 10, 10);
         g.drawString("Player State: " + player.getState(), 10, 30);
 
         g.drawString("xPos: " + player.getXPos(), 10, 50);
@@ -89,5 +109,8 @@ public class Board extends JPanel {
         g.drawString("Crouching: " + player.isCrouching(), 200, 110);
         g.drawString("At Wall: " + player.isAtWall(), 200, 130);
         g.drawString("Wall pushing: " + player.isWallPushing(), 200, 150);
+
+        g.drawString("Mouse Position: " + MouseTracker.getMousePoint(), 400, 10);
+        g.drawString("Mouse Buttons Pressed: " + MouseTracker.getButtonsPressed(), 400, 30);
     }
 }
