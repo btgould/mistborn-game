@@ -2,8 +2,8 @@ package display;
 
 import javax.swing.JPanel;
 
-import metals.Metal;
-import platforms.Platform;
+import levels.Metal;
+import levels.Platform;
 
 //event listening imports
 import player.KeyTracker;
@@ -46,9 +46,6 @@ public class Board extends JPanel {
         KeyTracker keyTracker = new KeyTracker();
         MouseTracker mouseTracker = new MouseTracker();
 
-        //TODO: for some reason, certain sets of three keys cant be registered at the same time
-        //holding down any two keys ignores any key directly above either
-        //works the same way in a word document, may just be how my computer works
         addKeyListener(keyTracker);
         addMouseListener(mouseTracker);
         addMouseMotionListener(mouseTracker);
@@ -94,12 +91,10 @@ public class Board extends JPanel {
         g.drawString("Keys Pressed: " + KeyTracker.getKeysPressed(), 10, 10);
         g.drawString("Player State: " + player.getState(), 10, 30);
 
-        g.drawString("xPos: " + player.getXPos(), 10, 50);
-        g.drawString("yPos: " + player.getYPos(), 10, 70);
-        g.drawString("xSpeed: " + player.getXSpeed(), 10, 90);
-        g.drawString("ySpeed: " + player.getYSpeed(), 10, 110);
-
-        g.drawString("Collided: " + player.collided(), 10, 130);
+        g.drawString("xPos: " + player.getxPos(), 10, 50);
+        g.drawString("yPos: " + player.getyPos(), 10, 70);
+        g.drawString("xSpeed: " + player.getxSpeed(), 10, 90);
+        g.drawString("ySpeed: " + player.getySpeed(), 10, 110);
 
         g.drawString("Accelerating: " + player.isAccelerating(), 200, 10);
         g.drawString("Sliding: " + player.isSliding(), 200, 30);

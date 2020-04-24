@@ -3,7 +3,7 @@ package display;
 //imports needed for swing
 import javax.swing.JFrame;
 
-import metals.Metal;
+import levels.Metal;
 
 import java.awt.EventQueue; //b/c swing not thread safe
 
@@ -13,7 +13,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 //imports to make a "level"
-import platforms.Platform;
+import levels.Platform;
 
 public class Display extends JFrame {
 

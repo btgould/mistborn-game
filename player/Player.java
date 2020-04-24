@@ -9,8 +9,8 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
-import metals.Metal;
-import platforms.Platform;
+import levels.Metal;
+import levels.Platform;
 
 import java.awt.event.KeyEvent;
 
@@ -45,8 +45,6 @@ public class Player {
 
     // used to determine player state. not equivalent to state,
     // because player can be accelerating and falling, for example
-    //TODO: change visibility back to private after debugging finished
-    //including collided();
     private boolean accelerating;
     private boolean canRun;
     private boolean sliding;
@@ -837,7 +835,7 @@ public class Player {
     }
 
     //returns true if overlapping with a platform
-    public boolean collided() {
+    private boolean collided() {
         //check every platform for collision
         for (int platNum = 0; platNum < Platform.getPlatforms().size(); platNum++) {
             Platform platform  = Platform.getPlatforms().get(platNum);
@@ -1071,24 +1069,8 @@ public class Player {
 
     //getters / setters
     //-----------------------------------------------------------------------------------------------
-    public String getXPos() {
-        return Double.toString(this.xPos);
-    }
-
-    public String getYPos() {
-        return Double.toString(this.yPos);
-    }
-
-    public String getXSpeed() {
-        return Double.toString(this.xSpeed);
-    }
-
-    public String getYSpeed() {
-        return Double.toString(this.ySpeed);
-    }
-
-    public String getState() {
-        return this.state.toString();
+    public State getState() {
+        return this.state;
     }
 
     public boolean isAccelerating() {
@@ -1177,5 +1159,57 @@ public class Player {
 
     public void setWallPushing(boolean wallPushing) {
         this.wallPushing = wallPushing;
+    }
+
+    public double getxPos() {
+        return xPos;
+    }
+
+    public void setxPos(double xPos) {
+        this.xPos = xPos;
+    }
+
+    public double getyPos() {
+        return yPos;
+    }
+
+    public void setyPos(double yPos) {
+        this.yPos = yPos;
+    }
+
+    public double getWidth() {
+        return width;
+    }
+
+    public void setWidth(double width) {
+        this.width = width;
+    }
+
+    public double getHeight() {
+        return height;
+    }
+
+    public void setHeight(double height) {
+        this.height = height;
+    }
+
+    public double getxSpeed() {
+        return xSpeed;
+    }
+
+    public void setxSpeed(double xSpeed) {
+        this.xSpeed = xSpeed;
+    }
+
+    public double getySpeed() {
+        return ySpeed;
+    }
+
+    public void setySpeed(double ySpeed) {
+        this.ySpeed = ySpeed;
+    }
+
+    public void setState(State state) {
+        this.state = state;
     }
 }
