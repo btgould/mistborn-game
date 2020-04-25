@@ -15,8 +15,6 @@ import java.awt.Graphics;
 import java.awt.Color;
 import java.util.ArrayList;
 //animation imports
-import java.util.Timer;
-import java.util.TimerTask;
 import java.awt.Toolkit;
 
 //imports to make a "level"
@@ -33,7 +31,6 @@ public class Board extends JPanel {
     private final int WIDTH = 500;
     private final int HEIGHT = 500;
 
-    private final int INITIAL_DELAY = 100;
     //for debugging: increase delay between frames to read stat menu
     private final int INTERVAL_DELAY = 1000 / 30;
 
@@ -52,6 +49,8 @@ public class Board extends JPanel {
         initBoard();
     }
 
+    //initialization
+    //---------------------------------------------------------------------------------------------------
     private void initBoard() {
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
@@ -64,18 +63,8 @@ public class Board extends JPanel {
 
         setFocusable(true);
 
-        //TODO: game freezes when minute changes
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new tickAnimation(), INITIAL_DELAY, INTERVAL_DELAY);
-    }
-
-    private class tickAnimation extends TimerTask {
-        @Override
-        public void run() {
-            player.tick();
-
-            repaint();
-        }
+        LevelThread thread = new LevelThread();
+        thread.start();
     }
 
     private void initPlatforms() {
@@ -92,6 +81,39 @@ public class Board extends JPanel {
         this.metals.add(new Metal(350, 525));
     }
 
+    //TODO: screen freezes every few seconds with no apparent reason
+    //animation timing
+    //---------------------------------------------------------------------------------------------------
+    private class LevelThread extends Thread {
+        @Override
+        public void run() {
+    
+            long beforeTime, timeDiff, sleep;
+    
+            beforeTime = System.currentTimeMillis();
+    
+            while (true) {
+                player.tick();
+                repaint();
+    
+                timeDiff = System.currentTimeMillis() - beforeTime;
+                sleep = INTERVAL_DELAY - timeDiff;
+    
+                if (sleep < 0) {
+                    sleep = 2;
+                }
+    
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {};
+    
+                beforeTime = System.currentTimeMillis();
+            }
+        }
+    }
+
+    //drawing
+    //---------------------------------------------------------------------------------------------------
     @Override
     protected void paintComponent(Graphics g) {
         //paint background
