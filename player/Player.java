@@ -15,20 +15,20 @@ public class Player {
     private double width = 50;
     private double height = 100;
 
-    //used to tweak the feel of the movement
-    private double gravity = 1; //amount that ySpeed is changed for every frame the player falls
-    private double airAcc = 0.5; //amount that xSpeed is changed for every frame the player moves in air
-    private double walkAcc = 1; //amount that xSpeed is changed for every frame the player walks
-    private double runAcc = 1; //amount that xSpeed is changed for every frame the player runs
-    private double maxAirSpeed; //max horiz airSpeed of player (set based on if player can run or not)
-    private double maxWalkSpeed = 8; //max speed the player can walk
-    private double maxRunSpeed = 15; //max speed the player can run
-    private double friction = 0.8; //proportion of speed that remains per frame while sliding
-    private double fullJumpSpeed = -17; //initial ySpeed when the player jumps
-    private double shortJumpSpeed = -10; //ySpeed to set if the player releases jump early
-    private double doubleJumpSpeed = -15; //initial ySpeed when the player double jumps
-    private double wallJumpYSpeed = -15; //initial ySpeed when the player wall jumps
-    private double wallJumpXSpeed = 10; //initial xSpeed away from wall when the player wall jumps
+    // used to tweak the feel of the movement
+    private double gravity = 1; // amount that ySpeed is changed for every frame the player falls
+    private double airAcc = 0.5; // amount that xSpeed is changed for every frame the player moves in air
+    private double walkAcc = 1; // amount that xSpeed is changed for every frame the player walks
+    private double runAcc = 1; // amount that xSpeed is changed for every frame the player runs
+    private double maxAirSpeed; // max horiz airSpeed of player (set based on if player can run or not)
+    private double maxWalkSpeed = 8; // max speed the player can walk
+    private double maxRunSpeed = 15; // max speed the player can run
+    private double friction = 0.8; // proportion of speed that remains per frame while sliding
+    private double fullJumpSpeed = -17; // initial ySpeed when the player jumps
+    private double shortJumpSpeed = -10; // ySpeed to set if the player releases jump early
+    private double doubleJumpSpeed = -15; // initial ySpeed when the player double jumps
+    private double wallJumpYSpeed = -15; // initial ySpeed when the player wall jumps
+    private double wallJumpXSpeed = 10; // initial xSpeed away from wall when the player wall jumps
 
     private boolean canJump;
     private boolean canDoubleJump;
@@ -107,7 +107,7 @@ public class Player {
                         this.state = State.FALLING;
                     }
                 }
-                //grounded, not crouching, not wall pushing, not accelerating -> stay in IDLE
+                // grounded, not crouching, not wall pushing, not accelerating -> stay in IDLE
                 break;
 
             case WALKING:
@@ -146,11 +146,13 @@ public class Player {
                         // grounded, not crouching, not wall pushing, sliding -> SLIDING
                         this.state = State.SLIDING;
                     } else if (Math.abs(this.xSpeed) >= this.maxWalkSpeed && this.canRun) {
-                        // grounded, not crouching, not wall pushing, not sliding, speed >= max walk speed and can run -> RUNNING
+                        // grounded, not crouching, not wall pushing, not sliding, speed >= max walk
+                        // speed and can run -> RUNNING
                         this.state = State.RUNNING;
                     } else if (this.xSpeed == 0 && !this.accelerating) {
-                        //grounded, not crouching, not wall pushing, not sliding, speed = 0 -> IDLE
-                        //needed because otherwise if xSpeed = 1 when released, checkForFriction sets sliding to false
+                        // grounded, not crouching, not wall pushing, not sliding, speed = 0 -> IDLE
+                        // needed because otherwise if xSpeed = 1 when released, checkForFriction sets
+                        // sliding to false
                         this.state = State.IDLE;
                     }
                 } else {
@@ -162,7 +164,8 @@ public class Player {
                         this.state = State.FALLING;
                     }
                 }
-                //grounded, not crouching, not at wall, not sliding, speed < max walk speed or cant run -> stay in WALKING
+                // grounded, not crouching, not at wall, not sliding, speed < max walk speed or
+                // cant run -> stay in WALKING
                 break;
 
             case RUNNING:
@@ -184,7 +187,7 @@ public class Player {
                 checkForCrouch();
                 checkForFriction();
 
-                //move
+                // move
                 move();
                 checkForCollision();
                 checkIfFalling();
@@ -201,7 +204,7 @@ public class Player {
                         // grounded, not crouching, not wall pushing, sliding -> SLIDING
                         this.state = State.SLIDING;
                     } else if (!this.canRun) {
-                        //TODO: should this also check for if speed < max walk speed?
+                        // TODO: should this also check for if speed < max walk speed?
                         // grounded, not crouching, not wall pushing, not sliding, cant run -> WALKING
                         this.state = State.WALKING;
                     }
@@ -214,7 +217,8 @@ public class Player {
                         this.state = State.FALLING;
                     }
                 }
-                // grounded, not crouching, not wall pushing, not sliding, can run -> stay in RUNNING
+                // grounded, not crouching, not wall pushing, not sliding, can run -> stay in
+                // RUNNING
                 break;
 
             case SLIDING:
@@ -236,12 +240,12 @@ public class Player {
                 checkForCrouch();
                 checkForFriction();
 
-                //move
+                // move
                 move();
                 checkForCollision();
                 checkIfFalling();
 
-                //determine next state
+                // determine next state
                 if (this.grounded) {
                     if (this.crouching) {
                         // grounded and crouching -> CROUCHING
@@ -258,7 +262,8 @@ public class Player {
                             this.state = State.WALKING;
                         }
                     } else if (this.xSpeed == 0) {
-                        // grounded, not crouching, not wall pushing, not accelerating, speed = 0 -> IDLE
+                        // grounded, not crouching, not wall pushing, not accelerating, speed = 0 ->
+                        // IDLE
                         this.state = State.IDLE;
                     }
                 } else {
@@ -270,11 +275,12 @@ public class Player {
                         this.state = State.FALLING;
                     }
                 }
-                // grounded, not crouching, not wall pushing, not accelerating, speed != 0 -> stay in SLIDING
+                // grounded, not crouching, not wall pushing, not accelerating, speed != 0 ->
+                // stay in SLIDING
                 break;
 
             case JUMPING:
-                //assumptions from being in JUMPING state
+                // assumptions from being in JUMPING state
                 this.sliding = false;
                 this.grounded = false;
                 this.jumping = true;
@@ -284,34 +290,35 @@ public class Player {
                 this.crouching = false;
                 this.wallPushing = false;
 
-                //check if assumptions were true
+                // check if assumptions were true
                 checkForAirAcc();
                 checkForRunAbility();
                 fall();
 
-                //move
+                // move
                 move();
                 checkForCollision();
                 checkIfAtWall();
 
-                //determine next state
-                if (!KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) || Math.abs(this.ySpeed) <= Math.abs(this.shortJumpSpeed)) {
+                // determine next state
+                if (!controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)
+                        || Math.abs(this.ySpeed) <= Math.abs(this.shortJumpSpeed)) {
                     this.ySpeed = this.shortJumpSpeed;
 
                     if (this.wallPushing) {
-                        //up not pressed or ySpeed too low, wall pushing -> WALL_FALLING
+                        // up not pressed or ySpeed too low, wall pushing -> WALL_FALLING
                         this.state = State.WALL_FALLING;
                     } else {
-                        //up not presses or ySpeed too low, not wall pushing -> FALLING
+                        // up not presses or ySpeed too low, not wall pushing -> FALLING
                         this.state = State.FALLING;
                     }
                 }
-                //up pressed, ySpeed higher than shortJumpSpeed -> stay in JUMPING
+                // up pressed, ySpeed higher than shortJumpSpeed -> stay in JUMPING
                 break;
 
             case DOUBLE_JUMPING:
-                //TODO: make double jumping state last for more than one frame
-                //assumptions from being in DOUBLE_JUMPING state
+                // TODO: make double jumping state last for more than one frame
+                // assumptions from being in DOUBLE_JUMPING state
                 this.sliding = false;
                 this.grounded = false;
                 this.jumping = false;
@@ -321,26 +328,26 @@ public class Player {
                 this.crouching = false;
                 this.wallPushing = false;
 
-                //check if assumptions were true
+                // check if assumptions were true
                 checkForAirAcc();
                 checkForRunAbility();
                 fall();
-                
-                //move
+
+                // move
                 move();
                 checkForCollision();
                 checkIfAtWall();
 
-                //determine next state
-                //TODO: can double jumping go into landing?
+                // determine next state
+                // TODO: can double jumping go into landing?
                 if (this.grounded) {
-                    //grounded -> LANDING
+                    // grounded -> LANDING
                     this.state = State.LANDING;
                 } else if (this.wallPushing) {
-                    //not grounded, wallPushing -> WALL_FALLING
+                    // not grounded, wallPushing -> WALL_FALLING
                     this.state = State.WALL_FALLING;
                 } else {
-                    //not grounded, not wallPushing -> FALLING
+                    // not grounded, not wallPushing -> FALLING
                     this.state = State.FALLING;
                 }
                 break;
@@ -362,23 +369,23 @@ public class Player {
                 checkForDoubleJump();
                 fall();
 
-                //move
+                // move
                 move();
                 checkForCollision();
                 checkIfAtWall();
 
                 // determine next state
                 if (this.grounded) {
-                    //grounded -> LANDING
+                    // grounded -> LANDING
                     this.state = State.LANDING;
                 } else if (this.doubleJumping) {
-                    //not grounded, double jumping -> DOUBLE_JUMPING
+                    // not grounded, double jumping -> DOUBLE_JUMPING
                     this.state = State.DOUBLE_JUMPING;
                 } else if (this.wallPushing) {
-                    //not grounded, not double jumping, wall pushing -> WALL_FALLING
+                    // not grounded, not double jumping, wall pushing -> WALL_FALLING
                     this.state = State.WALL_FALLING;
-                } 
-                //not grounded, not double jumping, not wall pushing -> stay in FALLING
+                }
+                // not grounded, not double jumping, not wall pushing -> stay in FALLING
                 break;
 
             case WALL_FALLING:
@@ -400,31 +407,33 @@ public class Player {
                 checkForDoubleJump();
                 fall();
 
-                //move
+                // move
                 move();
                 checkForCollision();
                 checkIfAtWall();
 
                 // determine next state
                 if (this.grounded) {
-                    //grounded -> LANDING
+                    // grounded -> LANDING
                     this.state = State.LANDING;
                 } else if (this.wallJumping) {
-                    //not grounded, wall jumping -> WALL_JUMPING
+                    // not grounded, wall jumping -> WALL_JUMPING
                     this.state = State.WALL_JUMPING;
                 } else if (this.doubleJumping) {
-                    //not grounded, not wall jumping, double jumping -> DOUBLE_JUMPING
+                    // not grounded, not wall jumping, double jumping -> DOUBLE_JUMPING
                     this.state = State.DOUBLE_JUMPING;
                 } else if (!this.wallPushing) {
-                    //not grounded, not wall jumping, not double jumping, not wall pushing -> FALLING
+                    // not grounded, not wall jumping, not double jumping, not wall pushing ->
+                    // FALLING
                     this.state = State.FALLING;
                 }
-                //not grounded, not wall jumping, not double jumping, wall pushing -> stay in WALL_FALLING
+                // not grounded, not wall jumping, not double jumping, wall pushing -> stay in
+                // WALL_FALLING
                 break;
 
             case WALL_JUMPING:
-                //TODO: make wall jumping state last for more than one frame
-                //assumptions from being in WALL_JUMPING state
+                // TODO: make wall jumping state last for more than one frame
+                // assumptions from being in WALL_JUMPING state
                 this.accelerating = true;
                 this.sliding = false;
                 this.grounded = false;
@@ -435,26 +444,26 @@ public class Player {
                 this.crouching = false;
                 this.wallPushing = false;
 
-                //check if assumptions were true
+                // check if assumptions were true
                 checkForAirAcc();
                 checkForRunAbility();
                 fall();
 
-                //move
+                // move
                 move();
                 checkForCollision();
                 checkIfAtWall();
 
-                //determine next state
-                //TODO: can wall jumping go into landing or wall falling?
+                // determine next state
+                // TODO: can wall jumping go into landing or wall falling?
                 if (this.grounded) {
-                    //grounded -> LANDING
+                    // grounded -> LANDING
                     this.state = State.LANDING;
                 } else if (this.wallPushing) {
-                    //not grounded, wallPushing -> WALL_FALLING
+                    // not grounded, wallPushing -> WALL_FALLING
                     this.state = State.WALL_FALLING;
                 } else {
-                    //not grounded, not wallPushing -> FALLING
+                    // not grounded, not wallPushing -> FALLING
                     this.state = State.FALLING;
                 }
                 break;
@@ -476,7 +485,7 @@ public class Player {
                 checkForWalkAcc();
                 checkForFriction();
 
-                //move
+                // move
                 move();
                 checkForCollision();
                 checkIfFalling();
@@ -495,7 +504,8 @@ public class Player {
                 }
                 break;
 
-            // TODO: actually change height when crouching, force crouch when space too small
+            // TODO: actually change height when crouching, force crouch when space too
+            // small
             case CROUCHING:
                 // assumptions from being in CROUCHING state
                 this.accelerating = false;
@@ -512,7 +522,7 @@ public class Player {
                 checkForCrouch();
                 checkForFriction();
 
-                //move
+                // move
                 move();
                 checkForCollision();
                 checkIfFalling();
@@ -535,10 +545,12 @@ public class Player {
                                 this.state = State.WALKING;
                             }
                         } else if (this.xSpeed == 0) {
-                            // grounded, not wall pushing, not crouching, not accelerating, speed = 0 -> IDLE
+                            // grounded, not wall pushing, not crouching, not accelerating, speed = 0 ->
+                            // IDLE
                             this.state = State.IDLE;
                         } else {
-                            // grounded, not wall pushing, not crouching, not accelerating, speed != 0 -> SLIDING
+                            // grounded, not wall pushing, not crouching, not accelerating, speed != 0 ->
+                            // SLIDING
                             this.state = State.SLIDING;
                         }
                     }
@@ -566,7 +578,7 @@ public class Player {
                 checkForCrouch();
                 checkForFriction();
 
-                //move
+                // move
                 move();
                 checkForCollision();
                 checkIfFalling();
@@ -589,7 +601,7 @@ public class Player {
                     // not grounded -> JUMPING
                     this.state = State.JUMPING;
                 }
-                //grounded, not crouching, not accelerating, wallPushing -> stay in AT_WALL
+                // grounded, not crouching, not accelerating, wallPushing -> stay in AT_WALL
                 break;
         }
     }
@@ -600,7 +612,8 @@ public class Player {
         this.wallPushing = false;
 
         // speed up to the left
-        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxWalkSpeed && !this.crouching) {
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxWalkSpeed
+                && !this.crouching) {
             if (this.wallSide == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -613,7 +626,8 @@ public class Player {
         }
 
         // speed up to the right
-        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxWalkSpeed && !this.crouching) {
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxWalkSpeed
+                && !this.crouching) {
             if (this.wallSide == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -652,7 +666,7 @@ public class Player {
         }
 
         // speed up to the left
-        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxAirSpeed) {
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxAirSpeed) {
             if (this.wallSide == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -665,7 +679,7 @@ public class Player {
         }
 
         // speed up to the right
-        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxAirSpeed) {
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxAirSpeed) {
             if (this.wallSide == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -683,7 +697,8 @@ public class Player {
         this.wallPushing = false;
 
         // speed up to the left
-        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxRunSpeed && !this.crouching) {
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxRunSpeed
+                && !this.crouching) {
             if (this.wallSide == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -696,7 +711,8 @@ public class Player {
         }
 
         // speed up to the right
-        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxRunSpeed && !this.crouching) {
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxRunSpeed
+                && !this.crouching) {
             if (this.wallSide == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -710,7 +726,7 @@ public class Player {
     }
 
     private void checkForRunAbility() {
-        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_SHIFT)) {
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_SHIFT)) {
             this.canRun = true;
         } else {
             this.canRun = false;
@@ -718,7 +734,8 @@ public class Player {
     }
 
     private void checkForFriction() {
-        if ((!(KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT)) && !(KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT)))
+        if ((!(controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT))
+                && !(controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT)))
                 || this.state == State.CROUCHING) {
             this.xSpeed *= this.friction;
 
@@ -733,7 +750,7 @@ public class Player {
 
     private void checkForJump() {
         // jump
-        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canJump == true) {
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canJump == true) {
             this.ySpeed = this.fullJumpSpeed;
 
             this.jumpReleased = false;
@@ -747,11 +764,12 @@ public class Player {
     }
 
     private void checkForDoubleJump() {
-        if (!KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)) {
+        if (!controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)) {
             this.jumpReleased = true;
         }
 
-        if (this.jumpReleased && KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canDoubleJump && !this.wallJumping) {
+        if (this.jumpReleased && controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canDoubleJump
+                && !this.wallJumping) {
             this.ySpeed = this.doubleJumpSpeed;
 
             this.canDoubleJump = false;
@@ -761,11 +779,12 @@ public class Player {
     }
 
     private void checkForWallJump() {
-        if (!KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)) {
+        if (!controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)) {
             this.jumpReleased = true;
         }
 
-        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.wallPushing && this.wallSide != this.lastWallJumpSide && this.jumpReleased) {
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.wallPushing
+                && this.wallSide != this.lastWallJumpSide && this.jumpReleased) {
             this.ySpeed = this.wallJumpYSpeed;
             this.jumpReleased = false;
 
@@ -783,7 +802,7 @@ public class Player {
     }
 
     private void checkForCrouch() {
-        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_DOWN) && this.grounded == true) {
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_DOWN) && this.grounded == true) {
             this.crouching = true;
         } else {
             this.crouching = false;
@@ -825,41 +844,40 @@ public class Player {
         }
     }
 
-    //returns true if overlapping with a platform
+    // returns true if overlapping with a platform
     private boolean collided() {
-        //check every platform for collision
+        // check every platform for collision
         for (int platNum = 0; platNum < Platform.getPlatforms().size(); platNum++) {
-            Platform platform  = Platform.getPlatforms().get(platNum);
+            Platform platform = Platform.getPlatforms().get(platNum);
             boolean onSameX = false;
             boolean onSameY = false;
 
-            if (this.xPos + this.width  + 2 > platform.getxPos() && platform.getxPos() + platform
-                    .getWidth()
-                    + 2 > this.xPos) {
+            if (this.xPos + this.width + 2 > platform.getxPos()
+                    && platform.getxPos() + platform.getWidth() + 2 > this.xPos) {
                 onSameX = true;
             }
 
-            if (this.yPos + this.height  + 2 > platform.getyPos() && platform.getyPos() + platform
-                    .getHeight()
-                    + 2 > this.yPos) {
+            if (this.yPos + this.height + 2 > platform.getyPos()
+                    && platform.getyPos() + platform.getHeight() + 2 > this.yPos) {
                 onSameY = true;
             }
 
-            //if player is in the same space as any platform, return true
+            // if player is in the same space as any platform, return true
             if (onSameX && onSameY) {
                 return true;
             }
         }
-        //if it gets here, player is not in the same space as any platform, so return false
+        // if it gets here, player is not in the same space as any platform, so return
+        // false
         return false;
     }
 
-    //TODO: collision bugs
-    //colliding with roof works weirdly
-    //can occasionally jump to top of a wall by colliding weirldly with floor
+    // TODO: collision bugs
+    // colliding with roof works weirdly
+    // can occasionally jump to top of a wall by colliding weirldly with floor
     private void checkForCollision() {
         if (collided()) {
-            double slope  = Math.abs(this.ySpeed / this.xSpeed);
+            double slope = Math.abs(this.ySpeed / this.xSpeed);
 
             double xOffset = 0;
             double yOffset = 0;
@@ -884,13 +902,13 @@ public class Player {
 
             this.xPos -= this.xSpeed;
             if (collided()) {
-                //collision caused by y movement
+                // collision caused by y movement
                 causedByY = true;
             }
             this.xPos += this.xSpeed;
             this.yPos -= this.ySpeed;
             if (collided()) {
-                //collision caused by x movement
+                // collision caused by x movement
                 causedByX = true;
             }
             this.yPos += this.ySpeed;
@@ -901,32 +919,32 @@ public class Player {
             if (causedByY) {
                 this.yPos = Math.round(this.yPos);
             }
-            
+
             while (collided()) {
                 if (xOffset == 0 && yOffset == 0) {
                     if (slope >= 1) {
-                        //tick y
+                        // tick y
                         this.yPos += yTickAmount;
                         yOffset++;
                     } else {
-                        //works b/c both cannot be 0, or player would never collide
-                        //tick x
+                        // works b/c both cannot be 0, or player would never collide
+                        // tick x
                         this.xPos += xTickAmount;
                         xOffset++;
                     }
                 } else if (yOffset / xOffset >= slope) {
-                    //tick x
+                    // tick x
                     this.xPos += xTickAmount;
                     xOffset++;
                 } else {
-                    //tick y
+                    // tick y
                     this.yPos += yTickAmount;
                     yOffset++;
                 }
             }
 
             if (causedByY) {
-                //player hit a floor or a ceiling
+                // player hit a floor or a ceiling
                 if (this.ySpeed > 0) {
                     this.grounded = true;
                     this.canJump = true;
@@ -939,20 +957,20 @@ public class Player {
             }
 
             if (causedByX) {
-                //player hit a wall
+                // player hit a wall
                 this.atWall = true;
-    
+
                 if (this.xSpeed > 0) {
                     this.wallSide = Side.RIGHT;
                 } else if (this.xSpeed < 0) {
                     this.wallSide = Side.LEFT;
                 }
-    
+
                 this.xSpeed = 0;
             }
         }
     }
-    
+
     private void fall() {
         if (this.falling == true) {
             this.ySpeed += this.gravity;
@@ -964,8 +982,8 @@ public class Player {
         this.yPos += this.ySpeed;
     }
 
-    //getters / setters
-    //-----------------------------------------------------------------------------------------------
+    // getters / setters
+    // -----------------------------------------------------------------------------------------------
     public State getState() {
         return this.state;
     }

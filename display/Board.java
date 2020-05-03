@@ -6,8 +6,7 @@ import levels.Metal;
 import levels.Platform;
 
 //event listening imports
-import player.KeyTracker;
-import player.MouseTracker;
+import controllers.*;
 
 //drawing imports
 import java.awt.Dimension;

@@ -1,4 +1,4 @@
-package player;
+package controllers;
 
 import java.util.HashSet;
 
