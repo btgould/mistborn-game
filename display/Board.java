@@ -34,7 +34,8 @@ public class Board extends JPanel {
     private final int INTERVAL_DELAY = 1000 / 30;
 
     //TODO: find a better place to initialize
-    private Level level;
+    //make level non-static
+    private static Level level;
     private ArrayList<Platform> platforms = new ArrayList<Platform>();
     private ArrayList<Metal> metals = new ArrayList<Metal>();
     private Painter painter = new Painter();
@@ -118,7 +119,7 @@ public class Board extends JPanel {
         //paint background
         super.paintComponent(g);
 
-        painter.paintLevel(g, this.level);
+        painter.paintLevel(g, level);
 
         Toolkit.getDefaultToolkit().sync();
 
@@ -144,5 +145,15 @@ public class Board extends JPanel {
 
         g.drawString("Mouse Position: " + MouseTracker.getMousePoint(), 400, 10);
         g.drawString("Mouse Buttons Pressed: " + MouseTracker.getButtonsPressed(), 400, 30);
+    }
+
+    //getters and setters
+    //---------------------------------------------------------------------------------------------------
+    public static Level getLevel() {
+        return level;
+    }
+
+    public void setLevel(Level level) {
+        Board.level = level;
     }
 }
