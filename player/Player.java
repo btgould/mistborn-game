@@ -5,6 +5,8 @@ import levels.Platform;
 
 import java.awt.event.KeyEvent;
 
+import player.state.*;
+
 public class Player {
 
     private double xPos = 350;
@@ -15,7 +17,12 @@ public class Player {
     private double width = 50;
     private double height = 100;
 
+    // used to communicate with other objects
+    // -----------------------------------------------------------------------------------------------
+    private StateManager stateManager; 
+
     // used to tweak the feel of the movement
+    // -----------------------------------------------------------------------------------------------
     private double gravity = 1; // amount that ySpeed is changed for every frame the player falls
     private double airAcc = 0.5; // amount that xSpeed is changed for every frame the player moves in air
     private double walkAcc = 1; // amount that xSpeed is changed for every frame the player walks
@@ -36,6 +43,7 @@ public class Player {
 
     // used to determine player state. not equivalent to state,
     // because player can be accelerating and falling, for example
+    // -----------------------------------------------------------------------------------------------
     private boolean accelerating;
     private boolean canRun;
     private boolean sliding;
@@ -57,11 +65,31 @@ public class Player {
 
     private Metal targetedMetal;
 
+
+    // -----------------------------------------------------------------------------------------------
     public Player() {
         this.state = State.IDLE;
+
+        registerStateManager(new StateManager());
     }
 
-    public void tick() {
+    public double getShortJumpSpeed() {
+		return shortJumpSpeed;
+	}
+
+	public void setShortJumpSpeed(double shortJumpSpeed) {
+		this.shortJumpSpeed = shortJumpSpeed;
+	}
+
+	public double getMaxWalkSpeed() {
+		return maxWalkSpeed;
+	}
+
+	public void setMaxWalkSpeed(double maxWalkSpeed) {
+		this.maxWalkSpeed = maxWalkSpeed;
+	}
+
+	public void tick() {
 
         switch (state) {
             case IDLE:
@@ -145,7 +173,7 @@ public class Player {
                     } else if (this.sliding) {
                         // grounded, not crouching, not wall pushing, sliding -> SLIDING
                         this.state = State.SLIDING;
-                    } else if (Math.abs(this.xSpeed) >= this.maxWalkSpeed && this.canRun) {
+                    } else if (Math.abs(this.xSpeed) >= this.getMaxWalkSpeed() && this.canRun) {
                         // grounded, not crouching, not wall pushing, not sliding, speed >= max walk
                         // speed and can run -> RUNNING
                         this.state = State.RUNNING;
@@ -256,7 +284,7 @@ public class Player {
                     } else if (this.accelerating) {
                         // grounded, not crouching, not wall pushing, accelerating -> determine based on
                         // speed & run ability
-                        if (Math.abs(this.xSpeed) >= this.maxWalkSpeed && this.canRun) {
+                        if (Math.abs(this.xSpeed) >= this.getMaxWalkSpeed() && this.canRun) {
                             this.state = State.RUNNING;
                         } else if (Math.abs(this.xSpeed) > 0) {
                             this.state = State.WALKING;
@@ -302,8 +330,8 @@ public class Player {
 
                 // determine next state
                 if (!controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)
-                        || Math.abs(this.ySpeed) <= Math.abs(this.shortJumpSpeed)) {
-                    this.ySpeed = this.shortJumpSpeed;
+                        || Math.abs(this.ySpeed) <= Math.abs(this.getShortJumpSpeed())) {
+                    this.ySpeed = this.getShortJumpSpeed();
 
                     if (this.wallPushing) {
                         // up not pressed or ySpeed too low, wall pushing -> WALL_FALLING
@@ -494,7 +522,7 @@ public class Player {
                 if (this.sliding) {
                     // sliding (triggered by not pressing left or right) -> SLIDING
                     this.state = State.SLIDING;
-                } else if (this.xSpeed >= this.maxWalkSpeed && this.canRun) {
+                } else if (this.xSpeed >= this.getMaxWalkSpeed() && this.canRun) {
                     // not sliding -> determine based on xSpeed & run ability
                     this.state = State.RUNNING;
                 } else if (Math.abs(this.xSpeed) > 0) {
@@ -539,7 +567,7 @@ public class Player {
                         if (this.accelerating) {
                             // grounded, not wall pushing, not crouching, and accelerating -> set based on
                             // speed & run ability
-                            if (Math.abs(this.xSpeed) >= this.maxWalkSpeed && this.canRun) {
+                            if (Math.abs(this.xSpeed) >= this.getMaxWalkSpeed() && this.canRun) {
                                 this.state = State.RUNNING;
                             } else if (Math.abs(this.xSpeed) > 0) {
                                 this.state = State.WALKING;
@@ -612,7 +640,7 @@ public class Player {
         this.wallPushing = false;
 
         // speed up to the left
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxWalkSpeed
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * getMaxWalkSpeed()
                 && !this.crouching) {
             if (this.wallSide == Side.LEFT) {
                 this.atWall = true;
@@ -626,7 +654,7 @@ public class Player {
         }
 
         // speed up to the right
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxWalkSpeed
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < getMaxWalkSpeed()
                 && !this.crouching) {
             if (this.wallSide == Side.RIGHT) {
                 this.atWall = true;
@@ -639,18 +667,18 @@ public class Player {
             }
         }
 
-        if (Math.abs(this.xSpeed) > this.maxWalkSpeed) {
+        if (Math.abs(this.xSpeed) > this.getMaxWalkSpeed()) {
             if (this.xSpeed > 0) {
                 this.xSpeed--;
             } else {
                 this.xSpeed++;
             }
 
-            if (Math.abs(this.xSpeed) < this.maxWalkSpeed) {
+            if (Math.abs(this.xSpeed) < this.getMaxWalkSpeed()) {
                 if (this.xSpeed > 0) {
-                    this.xSpeed = this.maxWalkSpeed;
+                    this.xSpeed = this.getMaxWalkSpeed();
                 } else {
-                    this.xSpeed = -1 * this.maxWalkSpeed;
+                    this.xSpeed = -1 * this.getMaxWalkSpeed();
                 }
             }
         }
@@ -662,7 +690,7 @@ public class Player {
         if (this.canRun) {
             this.maxAirSpeed = this.maxRunSpeed;
         } else {
-            this.maxAirSpeed = this.maxWalkSpeed;
+            this.maxAirSpeed = this.getMaxWalkSpeed();
         }
 
         // speed up to the left
@@ -980,6 +1008,13 @@ public class Player {
     private void move() {
         this.xPos += this.xSpeed;
         this.yPos += this.ySpeed;
+    }
+
+    //register methods
+    // -----------------------------------------------------------------------------------------------
+    private void registerStateManager(StateManager stateManager) {
+        this.stateManager = stateManager;
+        stateManager.setTargetPlayer(this);
     }
 
     // getters / setters
