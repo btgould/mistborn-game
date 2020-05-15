@@ -6,6 +6,7 @@ import levels.Platform;
 import java.awt.event.KeyEvent;
 
 import player.state.*;
+import player.platforming.*;
 
 public class Player {
 
@@ -20,22 +21,6 @@ public class Player {
     // used to communicate with other objects
     // -----------------------------------------------------------------------------------------------
     private StateManager stateManager; 
-
-    // used to tweak the feel of the movement
-    // -----------------------------------------------------------------------------------------------
-    private double gravity = 1; // amount that ySpeed is changed for every frame the player falls
-    private double airAcc = 0.5; // amount that xSpeed is changed for every frame the player moves in air
-    private double walkAcc = 1; // amount that xSpeed is changed for every frame the player walks
-    private double runAcc = 1; // amount that xSpeed is changed for every frame the player runs
-    private double maxAirSpeed; // max horiz airSpeed of player (set based on if player can run or not)
-    private double maxWalkSpeed = 8; // max speed the player can walk
-    private double maxRunSpeed = 15; // max speed the player can run
-    private double friction = 0.8; // proportion of speed that remains per frame while sliding
-    private double fullJumpSpeed = -17; // initial ySpeed when the player jumps
-    private double shortJumpSpeed = -10; // ySpeed to set if the player releases jump early
-    private double doubleJumpSpeed = -15; // initial ySpeed when the player double jumps
-    private double wallJumpYSpeed = -15; // initial ySpeed when the player wall jumps
-    private double wallJumpXSpeed = 10; // initial xSpeed away from wall when the player wall jumps
 
     private boolean canJump;
     private boolean canDoubleJump;
@@ -72,22 +57,6 @@ public class Player {
 
         registerStateManager(new StateManager());
     }
-
-    public double getShortJumpSpeed() {
-		return shortJumpSpeed;
-	}
-
-	public void setShortJumpSpeed(double shortJumpSpeed) {
-		this.shortJumpSpeed = shortJumpSpeed;
-	}
-
-	public double getMaxWalkSpeed() {
-		return maxWalkSpeed;
-	}
-
-	public void setMaxWalkSpeed(double maxWalkSpeed) {
-		this.maxWalkSpeed = maxWalkSpeed;
-	}
 
 	public void tick() {
 
@@ -423,13 +392,13 @@ public class Player {
         this.wallPushing = false;
 
         // speed up to the left
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * getMaxWalkSpeed()
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * PlatformingConstants.getMaxWalkSpeed()
                 && !this.crouching) {
             if (this.wallSide == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
             } else {
-                this.xSpeed -= this.walkAcc;
+                this.xSpeed -= PlatformingConstants.getWalkAcc();
                 this.atWall = false;
                 this.accelerating = true;
                 this.wallSide = Side.NONE;
@@ -437,31 +406,31 @@ public class Player {
         }
 
         // speed up to the right
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < getMaxWalkSpeed()
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < PlatformingConstants.getMaxWalkSpeed()
                 && !this.crouching) {
             if (this.wallSide == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
             } else {
-                this.xSpeed += this.walkAcc;
+                this.xSpeed += PlatformingConstants.getWalkAcc();
                 this.atWall = false;
                 this.accelerating = true;
                 this.wallSide = Side.NONE;
             }
         }
 
-        if (Math.abs(this.xSpeed) > this.getMaxWalkSpeed()) {
+        if (Math.abs(this.xSpeed) > PlatformingConstants.getMaxWalkSpeed()) {
             if (this.xSpeed > 0) {
                 this.xSpeed--;
             } else {
                 this.xSpeed++;
             }
 
-            if (Math.abs(this.xSpeed) < this.getMaxWalkSpeed()) {
+            if (Math.abs(this.xSpeed) < PlatformingConstants.getMaxWalkSpeed()) {
                 if (this.xSpeed > 0) {
-                    this.xSpeed = this.getMaxWalkSpeed();
+                    this.xSpeed = PlatformingConstants.getMaxWalkSpeed();
                 } else {
-                    this.xSpeed = -1 * this.getMaxWalkSpeed();
+                    this.xSpeed = -1 * PlatformingConstants.getMaxWalkSpeed();
                 }
             }
         }
@@ -471,18 +440,19 @@ public class Player {
         this.wallPushing = false;
 
         if (this.canRun) {
-            this.maxAirSpeed = this.maxRunSpeed;
+            PlatformingConstants.setMaxAirSpeed(PlatformingConstants.getMaxRunSpeed());
         } else {
-            this.maxAirSpeed = this.getMaxWalkSpeed();
+            PlatformingConstants.setMaxAirSpeed(PlatformingConstants.getMaxWalkSpeed());
         }
 
         // speed up to the left
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxAirSpeed) {
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * PlatformingConstants
+                .getMaxAirSpeed()) {
             if (this.wallSide == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
             } else {
-                this.xSpeed -= this.airAcc;
+                this.xSpeed -= PlatformingConstants.getAirAcc();
                 this.atWall = false;
                 this.accelerating = true;
                 this.wallSide = Side.NONE;
@@ -490,12 +460,13 @@ public class Player {
         }
 
         // speed up to the right
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxAirSpeed) {
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < PlatformingConstants
+                .getMaxAirSpeed()) {
             if (this.wallSide == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
             } else {
-                this.xSpeed += this.airAcc;
+                this.xSpeed += PlatformingConstants.getAirAcc();
                 this.atWall = false;
                 this.accelerating = true;
                 this.wallSide = Side.NONE;
@@ -508,13 +479,14 @@ public class Player {
         this.wallPushing = false;
 
         // speed up to the left
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * maxRunSpeed
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * PlatformingConstants
+                .getMaxRunSpeed()
                 && !this.crouching) {
             if (this.wallSide == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
             } else {
-                this.xSpeed -= this.runAcc;
+                this.xSpeed -= PlatformingConstants.getRunAcc();
                 this.atWall = false;
                 this.accelerating = true;
                 this.wallSide = Side.NONE;
@@ -522,13 +494,14 @@ public class Player {
         }
 
         // speed up to the right
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < maxRunSpeed
+        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < PlatformingConstants
+                .getMaxRunSpeed()
                 && !this.crouching) {
             if (this.wallSide == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
             } else {
-                this.xSpeed += this.runAcc;
+                this.xSpeed += PlatformingConstants.getRunAcc();
                 this.atWall = false;
                 this.accelerating = true;
                 this.wallSide = Side.NONE;
@@ -548,7 +521,7 @@ public class Player {
         if ((!(controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT))
                 && !(controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT)))
                 || this.state == State.CROUCHING) {
-            this.xSpeed *= this.friction;
+            this.xSpeed *= PlatformingConstants.getFriction();
 
             this.sliding = true;
 
@@ -562,7 +535,7 @@ public class Player {
     private void checkForJump() {
         // jump
         if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canJump == true) {
-            this.ySpeed = this.fullJumpSpeed;
+            this.ySpeed = PlatformingConstants.getFullJumpSpeed();
 
             this.jumpReleased = false;
             this.canJump = false;
@@ -581,7 +554,7 @@ public class Player {
 
         if (this.jumpReleased && controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canDoubleJump
                 && !this.wallJumping) {
-            this.ySpeed = this.doubleJumpSpeed;
+            this.ySpeed = PlatformingConstants.getDoubleJumpSpeed();
 
             this.canDoubleJump = false;
             this.doubleJumping = true;
@@ -596,13 +569,13 @@ public class Player {
 
         if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.wallPushing
                 && this.wallSide != this.lastWallJumpSide && this.jumpReleased) {
-            this.ySpeed = this.wallJumpYSpeed;
+            this.ySpeed = PlatformingConstants.getWallJumpYSpeed();
             this.jumpReleased = false;
 
             if (this.wallSide == Side.RIGHT) {
-                this.xSpeed = -1 * this.wallJumpXSpeed;
+                this.xSpeed = -1 * PlatformingConstants.getWallJumpXSpeed();
             } else if (this.wallSide == Side.LEFT) {
-                this.xSpeed = this.wallJumpXSpeed;
+                this.xSpeed = PlatformingConstants.getWallJumpXSpeed();
             }
 
             this.lastWallJumpSide = this.wallSide;
@@ -784,7 +757,7 @@ public class Player {
 
     private void fall() {
         if (this.falling == true) {
-            this.ySpeed += this.gravity;
+            this.ySpeed += PlatformingConstants.getGravity();
         }
     }
 

@@ -1,6 +1,7 @@
 package player.state;
 
 import player.*;
+import player.platforming.*;
 import java.awt.event.KeyEvent;
 
 public class StateManager {
@@ -45,7 +46,8 @@ public class StateManager {
                     } else if (targetPlayer.isSliding()) {
                         // grounded, not crouching, not wall pushing, sliding -> SLIDING
                         nextState = State.SLIDING;
-                    } else if (Math.abs(targetPlayer.getxSpeed()) >= targetPlayer.getMaxWalkSpeed() && targetPlayer.getCanRun()) {
+                    } else if (Math.abs(targetPlayer.getxSpeed()) >= PlatformingConstants.getMaxWalkSpeed()
+                            && targetPlayer.getCanRun()) {
                         // grounded, not crouching, not wall pushing, not sliding, speed >= max walk
                         // speed and can run -> RUNNING
                         nextState = State.RUNNING;
@@ -108,7 +110,7 @@ public class StateManager {
                     } else if (targetPlayer.isAccelerating()) {
                         // grounded, not crouching, not wall pushing, accelerating -> determine based on
                         // speed & run ability
-                        if (Math.abs(targetPlayer.getxSpeed()) >= targetPlayer.getMaxWalkSpeed()
+                        if (Math.abs(targetPlayer.getxSpeed()) >= PlatformingConstants.getMaxWalkSpeed()
                                 && targetPlayer.getCanRun()) {
                             nextState = State.RUNNING;
                         } else if (Math.abs(targetPlayer.getxSpeed()) > 0) {
@@ -133,20 +135,20 @@ public class StateManager {
                 break;
 
             case JUMPING:
-                //TODO: make this only State-oriented
+                // TODO: make this only State-oriented
                 if (!controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)
-                            || Math.abs(targetPlayer.getySpeed()) <= Math.abs(targetPlayer.getShortJumpSpeed())) {
-                                targetPlayer.setySpeed(targetPlayer.getShortJumpSpeed());
+                        || Math.abs(targetPlayer.getySpeed()) <= Math.abs(PlatformingConstants.getShortJumpSpeed())) {
+                    targetPlayer.setySpeed(PlatformingConstants.getShortJumpSpeed());
 
-                        if (targetPlayer.isWallPushing()) {
-                            // up not pressed or ySpeed too low, wall pushing -> WALL_FALLING
-                            nextState = State.WALL_FALLING;
-                        } else {
-                            // up not presses or ySpeed too low, not wall pushing -> FALLING
-                            nextState = State.FALLING;
-                        }
+                    if (targetPlayer.isWallPushing()) {
+                        // up not pressed or ySpeed too low, wall pushing -> WALL_FALLING
+                        nextState = State.WALL_FALLING;
+                    } else {
+                        // up not presses or ySpeed too low, not wall pushing -> FALLING
+                        nextState = State.FALLING;
                     }
-                    // up pressed, ySpeed higher than shortJumpSpeed -> stay in JUMPING
+                }
+                // up pressed, ySpeed higher than shortJumpSpeed -> stay in JUMPING
                 break;
 
             case DOUBLE_JUMPING:
@@ -214,7 +216,7 @@ public class StateManager {
                 if (targetPlayer.isSliding()) {
                     // sliding (triggered by not pressing left or right) -> SLIDING
                     nextState = State.SLIDING;
-                } else if (targetPlayer.getxSpeed() >= targetPlayer.getMaxWalkSpeed() && targetPlayer.getCanRun()) {
+                } else if (targetPlayer.getxSpeed() >= PlatformingConstants.getMaxWalkSpeed() && targetPlayer.getCanRun()) {
                     // not sliding -> determine based on xSpeed & run ability
                     nextState = State.RUNNING;
                 } else if (Math.abs(targetPlayer.getxSpeed()) > 0) {
@@ -236,7 +238,8 @@ public class StateManager {
                         if (targetPlayer.isAccelerating()) {
                             // grounded, not wall pushing, not crouching, and accelerating -> set based on
                             // speed & run ability
-                            if (Math.abs(targetPlayer.getxSpeed()) >= targetPlayer.getMaxWalkSpeed()
+                            if (Math.abs(targetPlayer.getxSpeed()) >= PlatformingConstants
+                                    .getMaxWalkSpeed()
                                     && targetPlayer.getCanRun()) {
                                 nextState = State.RUNNING;
                             } else if (Math.abs(targetPlayer.getxSpeed()) > 0) {
