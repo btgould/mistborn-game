@@ -115,27 +115,7 @@ public class Player {
                 checkIfFalling();
 
                 // determine next state
-                if (this.grounded) {
-                    if (this.crouching) {
-                        // grounded and crouching -> CROUCHING
-                        this.state = State.CROUCHING;
-                    } else if (this.wallPushing) {
-                        // grounded, not crouching, wall pushing -> AT_WALL
-                        this.state = State.AT_WALL;
-                    } else if (this.accelerating) {
-                        // grounded, not crouching, not wall pushing, accelerating -> WALKING
-                        this.state = State.WALKING;
-                    }
-                } else {
-                    if (this.jumping) {
-                        // not grounded, jumping -> JUMPING
-                        this.state = State.JUMPING;
-                    } else {
-                        // not grounded, not jumping -> FALLING
-                        this.state = State.FALLING;
-                    }
-                }
-                // grounded, not crouching, not wall pushing, not accelerating -> stay in IDLE
+                this.state = stateManager.getNextState(this.state);
                 break;
 
             case WALKING:
@@ -163,37 +143,7 @@ public class Player {
                 checkIfFalling();
 
                 // determine next state
-                if (this.grounded) {
-                    if (this.crouching) {
-                        // grounded and crouching -> CROUCHING
-                        this.state = State.CROUCHING;
-                    } else if (this.wallPushing) {
-                        // grounded, not crouching, wall pushing -> AT_WALL
-                        this.state = State.AT_WALL;
-                    } else if (this.sliding) {
-                        // grounded, not crouching, not wall pushing, sliding -> SLIDING
-                        this.state = State.SLIDING;
-                    } else if (Math.abs(this.xSpeed) >= this.getMaxWalkSpeed() && this.canRun) {
-                        // grounded, not crouching, not wall pushing, not sliding, speed >= max walk
-                        // speed and can run -> RUNNING
-                        this.state = State.RUNNING;
-                    } else if (this.xSpeed == 0 && !this.accelerating) {
-                        // grounded, not crouching, not wall pushing, not sliding, speed = 0 -> IDLE
-                        // needed because otherwise if xSpeed = 1 when released, checkForFriction sets
-                        // sliding to false
-                        this.state = State.IDLE;
-                    }
-                } else {
-                    if (this.jumping) {
-                        // not grounded, jumping -> JUMPING
-                        this.state = State.JUMPING;
-                    } else {
-                        // not grounded, not jumping -> FALLING
-                        this.state = State.FALLING;
-                    }
-                }
-                // grounded, not crouching, not at wall, not sliding, speed < max walk speed or
-                // cant run -> stay in WALKING
+                this.state = stateManager.getNextState(this.state);
                 break;
 
             case RUNNING:
@@ -221,32 +171,7 @@ public class Player {
                 checkIfFalling();
 
                 // determine next state
-                if (this.grounded) {
-                    if (this.crouching) {
-                        // grounded and crouching -> CROUCHING
-                        this.state = State.CROUCHING;
-                    } else if (this.wallPushing) {
-                        // grounded, not crouching, wall pushing -> AT_WALL
-                        this.state = State.AT_WALL;
-                    } else if (this.sliding) {
-                        // grounded, not crouching, not wall pushing, sliding -> SLIDING
-                        this.state = State.SLIDING;
-                    } else if (!this.canRun) {
-                        // TODO: should this also check for if speed < max walk speed?
-                        // grounded, not crouching, not wall pushing, not sliding, cant run -> WALKING
-                        this.state = State.WALKING;
-                    }
-                } else {
-                    if (this.jumping) {
-                        // not grounded, jumping -> JUMPING
-                        this.state = State.JUMPING;
-                    } else {
-                        // not grounded, not jumping -> FALLING
-                        this.state = State.FALLING;
-                    }
-                }
-                // grounded, not crouching, not wall pushing, not sliding, can run -> stay in
-                // RUNNING
+                this.state = stateManager.getNextState(this.state);
                 break;
 
             case SLIDING:
@@ -274,37 +199,7 @@ public class Player {
                 checkIfFalling();
 
                 // determine next state
-                if (this.grounded) {
-                    if (this.crouching) {
-                        // grounded and crouching -> CROUCHING
-                        this.state = State.CROUCHING;
-                    } else if (this.wallPushing) {
-                        // grounded, not crouching, wall pushing -> AT_WALL
-                        this.state = State.AT_WALL;
-                    } else if (this.accelerating) {
-                        // grounded, not crouching, not wall pushing, accelerating -> determine based on
-                        // speed & run ability
-                        if (Math.abs(this.xSpeed) >= this.getMaxWalkSpeed() && this.canRun) {
-                            this.state = State.RUNNING;
-                        } else if (Math.abs(this.xSpeed) > 0) {
-                            this.state = State.WALKING;
-                        }
-                    } else if (this.xSpeed == 0) {
-                        // grounded, not crouching, not wall pushing, not accelerating, speed = 0 ->
-                        // IDLE
-                        this.state = State.IDLE;
-                    }
-                } else {
-                    if (this.jumping) {
-                        // not grounded, jumping -> JUMPING
-                        this.state = State.JUMPING;
-                    } else {
-                        // not grounded, not jumping -> FALLING
-                        this.state = State.FALLING;
-                    }
-                }
-                // grounded, not crouching, not wall pushing, not accelerating, speed != 0 ->
-                // stay in SLIDING
+                this.state = stateManager.getNextState(this.state);
                 break;
 
             case JUMPING:
@@ -329,19 +224,7 @@ public class Player {
                 checkIfAtWall();
 
                 // determine next state
-                if (!controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)
-                        || Math.abs(this.ySpeed) <= Math.abs(this.getShortJumpSpeed())) {
-                    this.ySpeed = this.getShortJumpSpeed();
-
-                    if (this.wallPushing) {
-                        // up not pressed or ySpeed too low, wall pushing -> WALL_FALLING
-                        this.state = State.WALL_FALLING;
-                    } else {
-                        // up not presses or ySpeed too low, not wall pushing -> FALLING
-                        this.state = State.FALLING;
-                    }
-                }
-                // up pressed, ySpeed higher than shortJumpSpeed -> stay in JUMPING
+                this.state = stateManager.getNextState(this.state);
                 break;
 
             case DOUBLE_JUMPING:
@@ -367,17 +250,7 @@ public class Player {
                 checkIfAtWall();
 
                 // determine next state
-                // TODO: can double jumping go into landing?
-                if (this.grounded) {
-                    // grounded -> LANDING
-                    this.state = State.LANDING;
-                } else if (this.wallPushing) {
-                    // not grounded, wallPushing -> WALL_FALLING
-                    this.state = State.WALL_FALLING;
-                } else {
-                    // not grounded, not wallPushing -> FALLING
-                    this.state = State.FALLING;
-                }
+                this.state = stateManager.getNextState(this.state);
                 break;
 
             case FALLING:
@@ -403,17 +276,7 @@ public class Player {
                 checkIfAtWall();
 
                 // determine next state
-                if (this.grounded) {
-                    // grounded -> LANDING
-                    this.state = State.LANDING;
-                } else if (this.doubleJumping) {
-                    // not grounded, double jumping -> DOUBLE_JUMPING
-                    this.state = State.DOUBLE_JUMPING;
-                } else if (this.wallPushing) {
-                    // not grounded, not double jumping, wall pushing -> WALL_FALLING
-                    this.state = State.WALL_FALLING;
-                }
-                // not grounded, not double jumping, not wall pushing -> stay in FALLING
+                this.state = stateManager.getNextState(this.state);
                 break;
 
             case WALL_FALLING:
@@ -441,22 +304,7 @@ public class Player {
                 checkIfAtWall();
 
                 // determine next state
-                if (this.grounded) {
-                    // grounded -> LANDING
-                    this.state = State.LANDING;
-                } else if (this.wallJumping) {
-                    // not grounded, wall jumping -> WALL_JUMPING
-                    this.state = State.WALL_JUMPING;
-                } else if (this.doubleJumping) {
-                    // not grounded, not wall jumping, double jumping -> DOUBLE_JUMPING
-                    this.state = State.DOUBLE_JUMPING;
-                } else if (!this.wallPushing) {
-                    // not grounded, not wall jumping, not double jumping, not wall pushing ->
-                    // FALLING
-                    this.state = State.FALLING;
-                }
-                // not grounded, not wall jumping, not double jumping, wall pushing -> stay in
-                // WALL_FALLING
+                this.state = stateManager.getNextState(this.state);
                 break;
 
             case WALL_JUMPING:
@@ -483,17 +331,7 @@ public class Player {
                 checkIfAtWall();
 
                 // determine next state
-                // TODO: can wall jumping go into landing or wall falling?
-                if (this.grounded) {
-                    // grounded -> LANDING
-                    this.state = State.LANDING;
-                } else if (this.wallPushing) {
-                    // not grounded, wallPushing -> WALL_FALLING
-                    this.state = State.WALL_FALLING;
-                } else {
-                    // not grounded, not wallPushing -> FALLING
-                    this.state = State.FALLING;
-                }
+                this.state = stateManager.getNextState(this.state);
                 break;
 
             // TODO: make landing state last for more than one frame
@@ -519,17 +357,7 @@ public class Player {
                 checkIfFalling();
 
                 // determine next state
-                if (this.sliding) {
-                    // sliding (triggered by not pressing left or right) -> SLIDING
-                    this.state = State.SLIDING;
-                } else if (this.xSpeed >= this.getMaxWalkSpeed() && this.canRun) {
-                    // not sliding -> determine based on xSpeed & run ability
-                    this.state = State.RUNNING;
-                } else if (Math.abs(this.xSpeed) > 0) {
-                    this.state = State.WALKING;
-                } else {
-                    this.state = State.IDLE;
-                }
+                this.state = stateManager.getNextState(this.state);
                 break;
 
             // TODO: actually change height when crouching, force crouch when space too
@@ -556,36 +384,7 @@ public class Player {
                 checkIfFalling();
 
                 // determine next state
-                if (this.grounded) {
-                    if (this.crouching) {
-                        // grounded, crouching -> CROUCHING
-                        this.state = State.CROUCHING;
-                    } else if (this.wallPushing) {
-                        // grounded, not crouching, wall pushing -> AT_WALL
-                        this.state = State.AT_WALL;
-                    } else {
-                        if (this.accelerating) {
-                            // grounded, not wall pushing, not crouching, and accelerating -> set based on
-                            // speed & run ability
-                            if (Math.abs(this.xSpeed) >= this.getMaxWalkSpeed() && this.canRun) {
-                                this.state = State.RUNNING;
-                            } else if (Math.abs(this.xSpeed) > 0) {
-                                this.state = State.WALKING;
-                            }
-                        } else if (this.xSpeed == 0) {
-                            // grounded, not wall pushing, not crouching, not accelerating, speed = 0 ->
-                            // IDLE
-                            this.state = State.IDLE;
-                        } else {
-                            // grounded, not wall pushing, not crouching, not accelerating, speed != 0 ->
-                            // SLIDING
-                            this.state = State.SLIDING;
-                        }
-                    }
-                } else {
-                    // not grounded -> FALLING (b/c cant jump)
-                    this.state = State.FALLING;
-                }
+                this.state = stateManager.getNextState(this.state);
                 break;
 
             case AT_WALL:
@@ -613,23 +412,7 @@ public class Player {
                 checkIfAtWall();
 
                 // determine next state
-                if (this.grounded) {
-                    if (this.crouching) {
-                        // grounded, crouching -> CROUCHING
-                        this.state = State.CROUCHING;
-                    } else if (this.accelerating) {
-                        // grounded, not crouching, accelerating (can only accelerate away from wall) ->
-                        // WALKING
-                        this.state = State.WALKING;
-                    } else if (!this.wallPushing) {
-                        // grounded, not crouching, not accelerating, not wall pushing -> IDLE
-                        this.state = State.IDLE;
-                    }
-                } else {
-                    // not grounded -> JUMPING
-                    this.state = State.JUMPING;
-                }
-                // grounded, not crouching, not accelerating, wallPushing -> stay in AT_WALL
+                this.state = stateManager.getNextState(this.state);
                 break;
         }
     }

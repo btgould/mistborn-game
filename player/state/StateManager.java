@@ -6,8 +6,7 @@ import java.awt.event.KeyEvent;
 public class StateManager {
     private Player targetPlayer; 
 
-    public State getNextState() {
-        State currentState = targetPlayer.getState();
+    public State getNextState(final State currentState) {
         State nextState = currentState;
 
         switch (currentState) {
@@ -33,8 +32,6 @@ public class StateManager {
                     }
                 }
                 // grounded, not crouching, not wall pushing, not accelerating -> stay in IDLE
-                nextState = State.IDLE;
-
                 break;
 
             case WALKING:
@@ -69,8 +66,6 @@ public class StateManager {
                 }
                 // grounded, not crouching, not at wall, not sliding, speed < max walk speed or
                 // cant run -> stay in WALKING
-                nextState = State.WALKING;
-                
                 break;
 
             case RUNNING:
@@ -100,8 +95,6 @@ public class StateManager {
                 }
                 // grounded, not crouching, not wall pushing, not sliding, can run -> stay in
                 // RUNNING
-                nextState = State.RUNNING;
-
                 break;
 
             case SLIDING:
@@ -137,8 +130,6 @@ public class StateManager {
                 }
                 // grounded, not crouching, not wall pushing, not accelerating, speed != 0 ->
                 // stay in SLIDING
-                nextState = State.SLIDING;
-
                 break;
 
             case JUMPING:
@@ -156,8 +147,6 @@ public class StateManager {
                         }
                     }
                     // up pressed, ySpeed higher than shortJumpSpeed -> stay in JUMPING
-                    nextState = State.JUMPING;
-
                 break;
 
             case DOUBLE_JUMPING:
@@ -200,8 +189,6 @@ public class StateManager {
                     nextState = State.WALL_FALLING;
                 }
                 // not grounded, not double jumping, not wall pushing -> stay in FALLING
-                nextState = State.FALLING;
-
                 break;
 
             case WALL_FALLING:
@@ -221,8 +208,6 @@ public class StateManager {
                 }
                 // not grounded, not wall jumping, not double jumping, wall pushing -> stay in
                 // WALL_FALLING
-                nextState = State.WALL_FALLING;
-
                 break;
 
             case LANDING:
@@ -291,7 +276,6 @@ public class StateManager {
                     nextState = State.JUMPING;
                 }
                 // grounded, not crouching, not accelerating, wallPushing -> stay in AT_WALL
-                nextState = State.AT_WALL;
 
                 break;
         }
