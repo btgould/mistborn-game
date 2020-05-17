@@ -34,6 +34,7 @@ public class Player {
     private boolean sliding;
 
     private boolean grounded;
+    private boolean landing;
     private boolean jumping;
     private boolean doubleJumping;
     private boolean wallJumping;
@@ -49,6 +50,7 @@ public class Player {
     private State state;
 
     private Metal targetedMetal;
+    
 
 
     // -----------------------------------------------------------------------------------------------
@@ -197,7 +199,6 @@ public class Player {
                 break;
 
             case DOUBLE_JUMPING:
-                // TODO: make double jumping state last for more than one frame
                 // assumptions from being in DOUBLE_JUMPING state
                 this.sliding = false;
                 this.grounded = false;
@@ -277,7 +278,6 @@ public class Player {
                 break;
 
             case WALL_JUMPING:
-                // TODO: make wall jumping state last for more than one frame
                 // assumptions from being in WALL_JUMPING state
                 this.accelerating = true;
                 this.sliding = false;
@@ -303,12 +303,12 @@ public class Player {
                 this.state = stateManager.getNextState(this.state);
                 break;
 
-            // TODO: make landing state last for more than one frame
             case LANDING:
                 // assumptions from being in LANDING state
                 this.accelerating = true;
                 this.sliding = false;
                 this.grounded = true;
+                this.landing = false; //player has already landed
                 this.jumping = false;
                 this.doubleJumping = false;
                 this.wallJumping = false;
@@ -582,7 +582,6 @@ public class Player {
 
             this.wallJumping = true;
         }
-
     }
 
     private void checkForCrouch() {
@@ -731,6 +730,7 @@ public class Player {
                 // player hit a floor or a ceiling
                 if (this.ySpeed > 0) {
                     this.grounded = true;
+                    this.landing = true;
                     this.canJump = true;
                     this.canDoubleJump = true;
                     this.lastWallJumpSide = Side.NONE;
@@ -917,5 +917,13 @@ public class Player {
 
     public void setState(State state) {
         this.state = state;
+    }
+
+    public boolean isLanding() {
+        return landing;
+    }
+
+    public void setLanding(boolean landing) {
+        this.landing = landing;
     }
 }

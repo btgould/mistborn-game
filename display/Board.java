@@ -81,7 +81,6 @@ public class Board extends JPanel {
         this.metals.add(new Metal(350, 525));
     }
 
-    //TODO: screen freezes every few seconds with no apparent reason
     //animation timing
     //---------------------------------------------------------------------------------------------------
     private class LevelThread extends Thread {
