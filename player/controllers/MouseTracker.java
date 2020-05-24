@@ -1,6 +1,8 @@
-package controllers;
+package player.controllers;
 
 import java.util.HashSet;
+
+import player.metalpushing.PusherPuller;
 
 import java.awt.Point;
 
@@ -17,6 +19,7 @@ public class MouseTracker extends MouseAdapter {
     @Override
     public void mouseMoved(MouseEvent e) {
         MouseTracker.mousePoint = new Point(e.getX(), e.getY());
+        PusherPuller.findTargetMetal();
     }
 
     @Override

@@ -7,6 +7,8 @@ import java.awt.event.KeyEvent;
 
 import player.state.*;
 import player.platforming.*;
+import player.controllers.*;
+import player.metalpushing.PusherPuller;
 
 public class Player {
 
@@ -20,7 +22,8 @@ public class Player {
 
     // used to communicate with other objects
     // -----------------------------------------------------------------------------------------------
-    private StateManager stateManager; 
+    private StateManager stateManager;
+    private PusherPuller pusherPuller;
 
     private boolean canJump;
     private boolean canDoubleJump;
@@ -50,17 +53,16 @@ public class Player {
     private State state;
 
     private Metal targetedMetal;
-    
-
 
     // -----------------------------------------------------------------------------------------------
     public Player() {
         this.state = State.IDLE;
 
         registerStateManager(new StateManager());
+        registerPusherPuller(new PusherPuller());
     }
 
-	public void tick() {
+    public void tick() {
 
         switch (state) {
             case IDLE:
@@ -308,7 +310,7 @@ public class Player {
                 this.accelerating = true;
                 this.sliding = false;
                 this.grounded = true;
-                this.landing = false; //player has already landed
+                this.landing = false; // player has already landed
                 this.jumping = false;
                 this.doubleJumping = false;
                 this.wallJumping = false;
@@ -392,8 +394,8 @@ public class Player {
         this.wallPushing = false;
 
         // speed up to the left
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * PlatformingConstants.getMaxWalkSpeed()
-                && !this.crouching) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT)
+                && this.xSpeed > -1 * PlatformingConstants.getMaxWalkSpeed() && !this.crouching) {
             if (this.wallSide == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -406,8 +408,8 @@ public class Player {
         }
 
         // speed up to the right
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < PlatformingConstants.getMaxWalkSpeed()
-                && !this.crouching) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT)
+                && this.xSpeed < PlatformingConstants.getMaxWalkSpeed() && !this.crouching) {
             if (this.wallSide == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -446,8 +448,8 @@ public class Player {
         }
 
         // speed up to the left
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * PlatformingConstants
-                .getMaxAirSpeed()) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT)
+                && this.xSpeed > -1 * PlatformingConstants.getMaxAirSpeed()) {
             if (this.wallSide == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -460,8 +462,8 @@ public class Player {
         }
 
         // speed up to the right
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < PlatformingConstants
-                .getMaxAirSpeed()) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT)
+                && this.xSpeed < PlatformingConstants.getMaxAirSpeed()) {
             if (this.wallSide == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -479,9 +481,8 @@ public class Player {
         this.wallPushing = false;
 
         // speed up to the left
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT) && this.xSpeed > -1 * PlatformingConstants
-                .getMaxRunSpeed()
-                && !this.crouching) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT)
+                && this.xSpeed > -1 * PlatformingConstants.getMaxRunSpeed() && !this.crouching) {
             if (this.wallSide == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -494,9 +495,8 @@ public class Player {
         }
 
         // speed up to the right
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT) && this.xSpeed < PlatformingConstants
-                .getMaxRunSpeed()
-                && !this.crouching) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT)
+                && this.xSpeed < PlatformingConstants.getMaxRunSpeed() && !this.crouching) {
             if (this.wallSide == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
@@ -510,7 +510,7 @@ public class Player {
     }
 
     private void checkForRunAbility() {
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_SHIFT)) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_SHIFT)) {
             this.canRun = true;
         } else {
             this.canRun = false;
@@ -518,9 +518,8 @@ public class Player {
     }
 
     private void checkForFriction() {
-        if ((!(controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT))
-                && !(controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT)))
-                || this.state == State.CROUCHING) {
+        if ((!(KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT))
+                && !(KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT))) || this.state == State.CROUCHING) {
             this.xSpeed *= PlatformingConstants.getFriction();
 
             this.sliding = true;
@@ -534,7 +533,7 @@ public class Player {
 
     private void checkForJump() {
         // jump
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canJump == true) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canJump == true) {
             this.ySpeed = PlatformingConstants.getFullJumpSpeed();
 
             this.jumpReleased = false;
@@ -548,11 +547,11 @@ public class Player {
     }
 
     private void checkForDoubleJump() {
-        if (!controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)) {
+        if (!KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)) {
             this.jumpReleased = true;
         }
 
-        if (this.jumpReleased && controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canDoubleJump
+        if (this.jumpReleased && KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canDoubleJump
                 && !this.wallJumping) {
             this.ySpeed = PlatformingConstants.getDoubleJumpSpeed();
 
@@ -563,11 +562,11 @@ public class Player {
     }
 
     private void checkForWallJump() {
-        if (!controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)) {
+        if (!KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)) {
             this.jumpReleased = true;
         }
 
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.wallPushing
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.wallPushing
                 && this.wallSide != this.lastWallJumpSide && this.jumpReleased) {
             this.ySpeed = PlatformingConstants.getWallJumpYSpeed();
             this.jumpReleased = false;
@@ -585,7 +584,7 @@ public class Player {
     }
 
     private void checkForCrouch() {
-        if (controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_DOWN) && this.grounded == true) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_DOWN) && this.grounded == true) {
             this.crouching = true;
         } else {
             this.crouching = false;
@@ -762,15 +761,27 @@ public class Player {
     }
 
     private void move() {
+        this.pusherPuller.setSteelPush();
+        this.xSpeed += this.pusherPuller.getxPush();
+        this.ySpeed -= this.pusherPuller.getyPush();
+
         this.xPos += this.xSpeed;
         this.yPos += this.ySpeed;
+
+                
+
     }
 
-    //register methods
+    // register methods
     // -----------------------------------------------------------------------------------------------
     private void registerStateManager(StateManager stateManager) {
         this.stateManager = stateManager;
         stateManager.setTargetPlayer(this);
+    }
+
+    private void registerPusherPuller(PusherPuller pusherPuller) {
+        this.pusherPuller = pusherPuller;
+        pusherPuller.setTargetPlayer(this);
     }
 
     // getters / setters

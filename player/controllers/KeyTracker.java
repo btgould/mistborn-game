@@ -1,4 +1,4 @@
-package controllers;
+package player.controllers;
 
 import java.util.HashSet;
 

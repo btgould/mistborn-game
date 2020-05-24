@@ -136,7 +136,7 @@ public class StateManager {
 
             case JUMPING:
                 // TODO: make this only State-oriented
-                if (!controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)
+                if (!player.controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)
                         || Math.abs(targetPlayer.getySpeed()) <= Math.abs(PlatformingConstants.getShortJumpSpeed())) {
                     targetPlayer.setySpeed(PlatformingConstants.getShortJumpSpeed());
 
@@ -180,31 +180,31 @@ public class StateManager {
                 break;
 
             case FALLING:
-                if (targetPlayer.isGrounded()) {
-                    // grounded -> LANDING
+                if (targetPlayer.isLanding()) {
+                    // landing -> LANDING
                     nextState = State.LANDING;
                 } else if (targetPlayer.isDoubleJumping()) {
-                    // not grounded, double jumping -> DOUBLE_JUMPING
+                    // not landing, double jumping -> DOUBLE_JUMPING
                     nextState = State.DOUBLE_JUMPING;
                 } else if (targetPlayer.isWallPushing()) {
-                    // not grounded, not double jumping, wall pushing -> WALL_FALLING
+                    // not landing, not double jumping, wall pushing -> WALL_FALLING
                     nextState = State.WALL_FALLING;
                 }
-                // not grounded, not double jumping, not wall pushing -> stay in FALLING
+                // not landing, not double jumping, not wall pushing -> stay in FALLING
                 break;
 
             case WALL_FALLING:
-                if (targetPlayer.isGrounded()) {
-                    // grounded -> LANDING
+                if (targetPlayer.isLanding()) {
+                    // landing -> LANDING
                     nextState = State.LANDING;
                 } else if (targetPlayer.isWallJumping()) {
-                    // not grounded, wall jumping -> WALL_JUMPING
+                    // not landing, wall jumping -> WALL_JUMPING
                     nextState = State.WALL_JUMPING;
                 } else if (targetPlayer.isDoubleJumping()) {
-                    // not grounded, not wall jumping, double jumping -> DOUBLE_JUMPING
+                    // not landing, not wall jumping, double jumping -> DOUBLE_JUMPING
                     nextState = State.DOUBLE_JUMPING;
                 } else if (!targetPlayer.isWallPushing()) {
-                    // not grounded, not wall jumping, not double jumping, not wall pushing ->
+                    // not landing, not wall jumping, not double jumping, not wall pushing ->
                     // FALLING
                     nextState = State.FALLING;
                 }
@@ -282,6 +282,42 @@ public class StateManager {
 
                 break;
         }
+
+        /*if (targetPlayer.isGrounded()) {
+            if (targetPlayer.isLanding()) {
+                nextState = State.LANDING;
+            } else if (targetPlayer.isCrouching()) {
+                nextState = State.CROUCHING;
+            } else if (targetPlayer.isWallPushing()) {
+                nextState = State.AT_WALL;
+            } else {
+                if (targetPlayer.isAccelerating()) {
+                    //TODO: figure out how to make this better (maybe add side that the player is facing)
+                    if (Math.abs(targetPlayer.getxSpeed()) >= PlatformingConstants.getMaxWalkSpeed()
+                                && targetPlayer.getCanRun()) {
+                            nextState = State.RUNNING;
+                        } else if (Math.abs(targetPlayer.getxSpeed()) > 0) {
+                            nextState = State.WALKING;
+                        }
+                } else if (targetPlayer.getxSpeed() == 0) {
+                    nextState = State.IDLE;
+                } else {
+                    nextState = State.SLIDING;
+                }
+            }
+        } else {
+            if (targetPlayer.isJumping()) {
+                nextState = State.JUMPING;
+            } else if (targetPlayer.isDoubleJumping()) {
+                nextState = State.DOUBLE_JUMPING;
+            } else if (targetPlayer.isWallJumping()) {
+                nextState = State.WALL_JUMPING;
+            } else if (targetPlayer.isWallPushing()) {
+                nextState = State.WALL_FALLING;
+            } else {
+                nextState = State.FALLING;
+            }
+        }*/
 
         return nextState;
     }

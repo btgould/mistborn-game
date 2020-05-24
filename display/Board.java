@@ -4,9 +4,9 @@ import javax.swing.JPanel;
 
 import levels.Metal;
 import levels.Platform;
-
 //event listening imports
-import controllers.*;
+import player.controllers.*;
+import player.metalpushing.PusherPuller;
 
 //drawing imports
 import java.awt.Dimension;
@@ -70,8 +70,8 @@ public class Board extends JPanel {
     private void initPlatforms() {
         // new Platform(xPos, yPos, width, height);
         // new Platform(0, 300, 500, 50);
-        this.platforms.add(new Platform(250, 100, 50, 500));
-        this.platforms.add(new Platform(450, 100, 50, 500));
+        //this.platforms.add(new Platform(250, 100, 50, 500));
+        //this.platforms.add(new Platform(450, 100, 50, 500));
         // new Platform(0, 100, 500, 50);
         this.platforms.add(new Platform(0, 500, 1500, 50));
     }
@@ -144,6 +144,14 @@ public class Board extends JPanel {
 
         g.drawString("Mouse Position: " + MouseTracker.getMousePoint(), 400, 10);
         g.drawString("Mouse Buttons Pressed: " + MouseTracker.getButtonsPressed(), 400, 30);
+
+        try {
+            g.drawString("Target Metal xPos: " + PusherPuller.getTargetMetal().getxPos(), 800, 10);
+            g.drawString("Target Metal yPos: " + PusherPuller.getTargetMetal().getyPos(), 800, 30);
+        } catch (NullPointerException e) {
+            g.drawString("Target Metal xPos: null", 800, 10);
+            g.drawString("Target Metal yPos: null", 800, 30);
+        };
     }
 
     //getters and setters
