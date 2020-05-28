@@ -1,6 +1,5 @@
 package player;
 
-import levels.Metal;
 import levels.Platform;
 
 import java.awt.event.KeyEvent;
@@ -51,9 +50,6 @@ public class Player {
     private Side lastWallJumpSide;
 
     private State state;
-
-    private Metal targetedMetal;
-
     // -----------------------------------------------------------------------------------------------
     public Player() {
         this.state = State.IDLE;

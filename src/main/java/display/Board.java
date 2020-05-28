@@ -163,4 +163,8 @@ public class Board extends JPanel {
     public void setLevel(Level level) {
         Board.level = level;
     }
+
+    public int getOne() {
+        return 1;
+    }
 }
