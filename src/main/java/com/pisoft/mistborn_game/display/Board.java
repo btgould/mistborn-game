@@ -1,12 +1,13 @@
-package display;
+package com.pisoft.mistborn_game.display;
 
 import javax.swing.JPanel;
 
-import levels.Metal;
-import levels.Platform;
+import com.pisoft.mistborn_game.levels.*;
+import com.pisoft.mistborn_game.player.Player;
+
 //event listening imports
-import player.controllers.*;
-import player.metalpushing.PusherPuller;
+import com.pisoft.mistborn_game.player.controllers.*;
+import com.pisoft.mistborn_game.player.metalpushing.PushPullManager;
 
 //drawing imports
 import java.awt.Dimension;
@@ -15,11 +16,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 //animation imports
 import java.awt.Toolkit;
-
-//imports to make a "level"
-import levels.*;
-
-import player.Player;
 
 public class Board extends JPanel {
 
@@ -134,20 +130,26 @@ public class Board extends JPanel {
         g.drawString("ySpeed: " + player.getySpeed(), 10, 110);
 
         g.drawString("Accelerating: " + player.isAccelerating(), 200, 10);
-        g.drawString("Sliding: " + player.isSliding(), 200, 30);
-        g.drawString("Grounded: " + player.isGrounded(), 200, 50);
-        g.drawString("Jumping: " + player.isJumping(), 200, 70);
-        g.drawString("Falling: " + player.isFalling(), 200, 90);
-        g.drawString("Crouching: " + player.isCrouching(), 200, 110);
-        g.drawString("At Wall: " + player.isAtWall(), 200, 130);
-        g.drawString("Wall pushing: " + player.isWallPushing(), 200, 150);
-
+        g.drawString("Can Run: " + player.getCanRun(), 200, 30);
+        g.drawString("Sliding: " + player.isSliding(), 200, 50);
+        
+        g.drawString("Grounded: " + player.isGrounded(), 200, 70);
+        g.drawString("Landing: " + player.isLanding(), 200, 90);
+        g.drawString("Jumping: " + player.isJumping(), 200, 110);
+        g.drawString("Double Jumping: " + player.isDoubleJumping(), 200, 130);
+        g.drawString("Wall Jumping: " + player.isWallJumping(), 200, 150);
+        g.drawString("Falling: " + player.isFalling(), 200, 170);
+        
+        g.drawString("Crouching: " + player.isCrouching(), 200, 190);
+        g.drawString("At Wall: " + player.isAtWall(), 200, 210);
+        g.drawString("Wall pushing: " + player.isWallPushing(), 200, 230);
+        
         g.drawString("Mouse Position: " + MouseTracker.getMousePoint(), 400, 10);
         g.drawString("Mouse Buttons Pressed: " + MouseTracker.getButtonsPressed(), 400, 30);
 
         try {
-            g.drawString("Target Metal xPos: " + PusherPuller.getTargetMetal().getxPos(), 800, 10);
-            g.drawString("Target Metal yPos: " + PusherPuller.getTargetMetal().getyPos(), 800, 30);
+            g.drawString("Target Metal xPos: " + PushPullManager.getTargetMetal().getxPos(), 800, 10);
+            g.drawString("Target Metal yPos: " + PushPullManager.getTargetMetal().getyPos(), 800, 30);
         } catch (NullPointerException e) {
             g.drawString("Target Metal xPos: null", 800, 10);
             g.drawString("Target Metal yPos: null", 800, 30);

@@ -1,13 +1,12 @@
-package player;
-
-import levels.Platform;
+package com.pisoft.mistborn_game.player;
 
 import java.awt.event.KeyEvent;
 
-import player.state.*;
-import player.platforming.*;
-import player.controllers.*;
-import player.metalpushing.PusherPuller;
+import com.pisoft.mistborn_game.levels.Platform;
+import com.pisoft.mistborn_game.player.controllers.*;
+import com.pisoft.mistborn_game.player.metalpushing.PushPullManager;
+import com.pisoft.mistborn_game.player.platforming.*;
+import com.pisoft.mistborn_game.player.state.*;
 
 public class Player {
 
@@ -22,7 +21,9 @@ public class Player {
     // used to communicate with other objects
     // -----------------------------------------------------------------------------------------------
     private StateManager stateManager;
-    private PusherPuller pusherPuller;
+    private PushPullManager pushPullManager;
+    private PlatformingManager platformingManager;
+    private ConditionManager conditionManager;
 
     private boolean canJump;
     private boolean canDoubleJump;
@@ -55,7 +56,7 @@ public class Player {
         this.state = State.IDLE;
 
         registerStateManager(new StateManager());
-        registerPusherPuller(new PusherPuller());
+        registerPushPullManager(new PushPullManager());
     }
 
     public void tick() {
@@ -392,28 +393,28 @@ public class Player {
         // speed up to the left
         if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT)
                 && this.xSpeed > -1 * PlatformingConstants.getMaxWalkSpeed() && !this.crouching) {
-            if (this.wallSide == Side.LEFT) {
+            if (this.getWallSide() == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
             } else {
                 this.xSpeed -= PlatformingConstants.getWalkAcc();
                 this.atWall = false;
                 this.accelerating = true;
-                this.wallSide = Side.NONE;
+                this.setWallSide(Side.NONE);
             }
         }
 
         // speed up to the right
         if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT)
                 && this.xSpeed < PlatformingConstants.getMaxWalkSpeed() && !this.crouching) {
-            if (this.wallSide == Side.RIGHT) {
+            if (this.getWallSide() == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
             } else {
                 this.xSpeed += PlatformingConstants.getWalkAcc();
                 this.atWall = false;
                 this.accelerating = true;
-                this.wallSide = Side.NONE;
+                this.setWallSide(Side.NONE);
             }
         }
 
@@ -446,28 +447,28 @@ public class Player {
         // speed up to the left
         if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT)
                 && this.xSpeed > -1 * PlatformingConstants.getMaxAirSpeed()) {
-            if (this.wallSide == Side.LEFT) {
+            if (this.getWallSide() == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
             } else {
                 this.xSpeed -= PlatformingConstants.getAirAcc();
                 this.atWall = false;
                 this.accelerating = true;
-                this.wallSide = Side.NONE;
+                this.setWallSide(Side.NONE);
             }
         }
 
         // speed up to the right
         if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT)
                 && this.xSpeed < PlatformingConstants.getMaxAirSpeed()) {
-            if (this.wallSide == Side.RIGHT) {
+            if (this.getWallSide() == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
             } else {
                 this.xSpeed += PlatformingConstants.getAirAcc();
                 this.atWall = false;
                 this.accelerating = true;
-                this.wallSide = Side.NONE;
+                this.setWallSide(Side.NONE);
             }
         }
 
@@ -479,28 +480,28 @@ public class Player {
         // speed up to the left
         if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_LEFT)
                 && this.xSpeed > -1 * PlatformingConstants.getMaxRunSpeed() && !this.crouching) {
-            if (this.wallSide == Side.LEFT) {
+            if (this.getWallSide() == Side.LEFT) {
                 this.atWall = true;
                 this.wallPushing = true;
             } else {
                 this.xSpeed -= PlatformingConstants.getRunAcc();
                 this.atWall = false;
                 this.accelerating = true;
-                this.wallSide = Side.NONE;
+                this.setWallSide(Side.NONE);
             }
         }
 
         // speed up to the right
         if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_RIGHT)
                 && this.xSpeed < PlatformingConstants.getMaxRunSpeed() && !this.crouching) {
-            if (this.wallSide == Side.RIGHT) {
+            if (this.getWallSide() == Side.RIGHT) {
                 this.atWall = true;
                 this.wallPushing = true;
             } else {
                 this.xSpeed += PlatformingConstants.getRunAcc();
                 this.atWall = false;
                 this.accelerating = true;
-                this.wallSide = Side.NONE;
+                this.setWallSide(Side.NONE);
             }
         }
     }
@@ -529,51 +530,51 @@ public class Player {
 
     private void checkForJump() {
         // jump
-        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canJump == true) {
+        if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canJump() == true) {
             this.ySpeed = PlatformingConstants.getFullJumpSpeed();
 
-            this.jumpReleased = false;
-            this.canJump = false;
+            this.setJumpReleased(false);
+            this.setCanJump(false);
             this.grounded = false;
             this.falling = true;
             this.jumping = true;
 
-            this.lastWallJumpSide = Side.NONE;
+            this.setLastWallJumpSide(Side.NONE);
         }
     }
 
     private void checkForDoubleJump() {
         if (!KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)) {
-            this.jumpReleased = true;
+            this.setJumpReleased(true);
         }
 
-        if (this.jumpReleased && KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canDoubleJump
+        if (this.isJumpReleased() && KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.canDoubleJump()
                 && !this.wallJumping) {
             this.ySpeed = PlatformingConstants.getDoubleJumpSpeed();
 
-            this.canDoubleJump = false;
+            this.setCanDoubleJump(false);
             this.doubleJumping = true;
-            this.jumpReleased = false;
+            this.setJumpReleased(false);
         }
     }
 
     private void checkForWallJump() {
         if (!KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)) {
-            this.jumpReleased = true;
+            this.setJumpReleased(true);
         }
 
         if (KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP) && this.wallPushing
-                && this.wallSide != this.lastWallJumpSide && this.jumpReleased) {
+                && this.getWallSide() != this.getLastWallJumpSide() && this.isJumpReleased()) {
             this.ySpeed = PlatformingConstants.getWallJumpYSpeed();
-            this.jumpReleased = false;
+            this.setJumpReleased(false);
 
-            if (this.wallSide == Side.RIGHT) {
+            if (this.getWallSide() == Side.RIGHT) {
                 this.xSpeed = -1 * PlatformingConstants.getWallJumpXSpeed();
-            } else if (this.wallSide == Side.LEFT) {
+            } else if (this.getWallSide() == Side.LEFT) {
                 this.xSpeed = PlatformingConstants.getWallJumpXSpeed();
             }
 
-            this.lastWallJumpSide = this.wallSide;
+            this.setLastWallJumpSide(this.getWallSide());
 
             this.wallJumping = true;
         }
@@ -592,7 +593,7 @@ public class Player {
 
         if (!collided()) {
             this.falling = true;
-            this.canJump = false;
+            this.setCanJump(false);
             this.grounded = false;
         }
 
@@ -602,17 +603,17 @@ public class Player {
     private void checkIfAtWall() {
         Side sideChecked = Side.NONE;
 
-        if (this.wallSide == Side.RIGHT) {
+        if (this.getWallSide() == Side.RIGHT) {
             this.xPos++;
             sideChecked = Side.RIGHT;
-        } else if (this.wallSide == Side.LEFT) {
+        } else if (this.getWallSide() == Side.LEFT) {
             this.xPos--;
             sideChecked = Side.LEFT;
         }
 
         if (!collided()) {
             this.atWall = false;
-            this.wallSide = Side.NONE;
+            this.setWallSide(Side.NONE);
         }
 
         if (sideChecked == Side.RIGHT) {
@@ -726,9 +727,9 @@ public class Player {
                 if (this.ySpeed > 0) {
                     this.grounded = true;
                     this.landing = true;
-                    this.canJump = true;
-                    this.canDoubleJump = true;
-                    this.lastWallJumpSide = Side.NONE;
+                    this.setCanJump(true);
+                    this.setCanDoubleJump(true);
+                    this.setLastWallJumpSide(Side.NONE);
                     this.falling = false;
                 }
 
@@ -740,9 +741,9 @@ public class Player {
                 this.atWall = true;
 
                 if (this.xSpeed > 0) {
-                    this.wallSide = Side.RIGHT;
+                    this.setWallSide(Side.RIGHT);
                 } else if (this.xSpeed < 0) {
-                    this.wallSide = Side.LEFT;
+                    this.setWallSide(Side.LEFT);
                 }
 
                 this.xSpeed = 0;
@@ -757,15 +758,12 @@ public class Player {
     }
 
     private void move() {
-        this.pusherPuller.setSteelPush();
-        this.xSpeed += this.pusherPuller.getxPush();
-        this.ySpeed -= this.pusherPuller.getyPush();
+        this.pushPullManager.setSteelPush();
+        this.xSpeed += this.pushPullManager.getxPush();
+        this.ySpeed -= this.pushPullManager.getyPush();
 
         this.xPos += this.xSpeed;
         this.yPos += this.ySpeed;
-
-                
-
     }
 
     // register methods
@@ -775,9 +773,19 @@ public class Player {
         stateManager.setTargetPlayer(this);
     }
 
-    private void registerPusherPuller(PusherPuller pusherPuller) {
-        this.pusherPuller = pusherPuller;
-        pusherPuller.setTargetPlayer(this);
+    private void registerPushPullManager(PushPullManager pushPullManager) {
+        this.pushPullManager = pushPullManager;
+        pushPullManager.setTargetPlayer(this);
+    }
+    
+    private void registerPlatformingManager(PlatformingManager platformingManager) {
+    	this.platformingManager = platformingManager;
+    	platformingManager.setTargetPlayer(this);
+    }
+    
+    private void registerConditionManager(ConditionManager conditionManager) {
+    	this.conditionManager = conditionManager;
+    	conditionManager.setTargetPlayer(this);
     }
 
     // getters / setters
@@ -933,4 +941,44 @@ public class Player {
     public void setLanding(boolean landing) {
         this.landing = landing;
     }
+
+	public Side getWallSide() {
+		return wallSide;
+	}
+
+	public void setWallSide(Side wallSide) {
+		this.wallSide = wallSide;
+	}
+
+	public boolean canJump() {
+		return canJump;
+	}
+
+	public void setCanJump(boolean canJump) {
+		this.canJump = canJump;
+	}
+
+	public boolean isJumpReleased() {
+		return jumpReleased;
+	}
+
+	public void setJumpReleased(boolean jumpReleased) {
+		this.jumpReleased = jumpReleased;
+	}
+
+	public Side getLastWallJumpSide() {
+		return lastWallJumpSide;
+	}
+
+	public void setLastWallJumpSide(Side lastWallJumpSide) {
+		this.lastWallJumpSide = lastWallJumpSide;
+	}
+
+	public boolean canDoubleJump() {
+		return canDoubleJump;
+	}
+
+	public void setCanDoubleJump(boolean canDoubleJump) {
+		this.canDoubleJump = canDoubleJump;
+	}
 }

@@ -1,15 +1,14 @@
-package player.metalpushing;
+package com.pisoft.mistborn_game.player.metalpushing;
 
 import java.awt.Point;
 import java.awt.event.InputEvent;
 
-import levels.*;
-import display.*;
+import com.pisoft.mistborn_game.display.*;
+import com.pisoft.mistborn_game.levels.*;
+import com.pisoft.mistborn_game.player.Player;
+import com.pisoft.mistborn_game.player.controllers.*;
 
-import player.Player;
-import player.controllers.*;
-
-public class PusherPuller {
+public class PushPullManager {
     private static Metal targetMetal;
     private Player targetPlayer;
 
@@ -44,8 +43,8 @@ public class PusherPuller {
             magnitude = MetalPushingConstants.getPushStrength() * Math.pow(Math.hypot(x1 - x2, y1 - y2), -2);
             direction = (x1 - x2 > 0) ? Math.atan((y1-y2) / (x1-x2)) : Math.atan((y1-y2) / (x1-x2)) + Math.PI;
 
-            xPush = magnitude * Math.cos(direction);
-            yPush = -magnitude * Math.sin(direction);
+            xPush = Math.abs(magnitude * Math.cos(direction)) < 0.3 ? 0 : magnitude * Math.cos(direction);
+            yPush = Math.abs(magnitude * Math.sin(direction)) < 0.3 ? 0 : -magnitude * Math.sin(direction);
         } else {
             //no metal is targeted, or player is not pressing button for push -> return zero push
             xPush = 0;
@@ -84,6 +83,6 @@ public class PusherPuller {
     }
 
     public static void setTargetMetal(Metal targetMetal) {
-        PusherPuller.targetMetal = targetMetal;
+        PushPullManager.targetMetal = targetMetal;
     }
 }

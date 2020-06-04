@@ -1,4 +1,4 @@
-package levels;
+package com.pisoft.mistborn_game.levels;
 
 import java.util.ArrayList;
 

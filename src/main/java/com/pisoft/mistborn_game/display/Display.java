@@ -1,4 +1,4 @@
-package display;
+package com.pisoft.mistborn_game.display;
 
 //imports needed for swing
 import javax.swing.JFrame;
@@ -12,13 +12,13 @@ import java.awt.event.ComponentEvent;
 public class Display extends JFrame {
 
     private static final long serialVersionUID = 3129809478408754800L;
-
+    
     private Dimension appSize = new Dimension();
     private Dimension screenSize = new Dimension();
 
     public double scale;
 
-    private Display() {
+    public Display() {
         initUI();
     }
 

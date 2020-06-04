@@ -1,4 +1,4 @@
-package player.controllers;
+package com.pisoft.mistborn_game.player.controllers;
 
 import java.util.HashSet;
 
@@ -21,7 +21,8 @@ public class KeyTracker extends KeyAdapter {
     //note: must use Integer type b/c e.getKeyCode returns type int
     //remove() is overloaded, and thinks that an argument of type int indicates the index of element to remove
     //while an argument of type Integer makes it actually find an element of that value
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public void keyReleased(KeyEvent e) {
         keysPressed.remove(new Integer(e.getKeyCode()));
     }

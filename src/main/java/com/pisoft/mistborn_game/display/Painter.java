@@ -1,4 +1,4 @@
-package display;
+package com.pisoft.mistborn_game.display;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -8,8 +8,8 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
-import levels.*;
-import player.Player;
+import com.pisoft.mistborn_game.levels.*;
+import com.pisoft.mistborn_game.player.Player;
 
 //TODO: paint only objects onscreen
 //TODO: add methods to paint menus

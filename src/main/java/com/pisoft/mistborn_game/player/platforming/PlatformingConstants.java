@@ -1,4 +1,4 @@
-package player.platforming;
+package com.pisoft.mistborn_game.player.platforming;
 
 public class PlatformingConstants {
     private static final double gravity = 1; // amount that ySpeed is changed for every frame the player falls

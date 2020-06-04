@@ -1,4 +1,4 @@
-package player.state;
+package com.pisoft.mistborn_game.player.state;
 
 public enum State {
     IDLE,

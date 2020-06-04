@@ -1,12 +1,14 @@
-package display;
+package com.pisoft.mistborn_game.display;
 
 import org.junit.Test;
+
+import com.pisoft.mistborn_game.display.Board;
 
 public class BoardTest {
     private Board board = new Board();
 
     @Test
-    public void boardHasLevel() {
+    public void testOne() {
         assert(board.getOne() == 1);
     }
 }

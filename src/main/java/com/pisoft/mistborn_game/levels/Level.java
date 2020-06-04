@@ -1,13 +1,13 @@
-package levels;
+package com.pisoft.mistborn_game.levels;
 
 import java.util.ArrayList;
 
-import player.Player;
+import com.pisoft.mistborn_game.player.Player;
 
 //TODO: add items, enemies, etc.
 public class Level {
     
-    private Player player;
+    private Player player = new Player();
 
     private ArrayList<Platform> platforms = new ArrayList<Platform>();
     private ArrayList<Metal> metals = new ArrayList<Metal>();

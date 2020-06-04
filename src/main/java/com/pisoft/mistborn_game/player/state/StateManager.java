@@ -1,8 +1,9 @@
-package player.state;
+package com.pisoft.mistborn_game.player.state;
 
-import player.*;
-import player.platforming.*;
 import java.awt.event.KeyEvent;
+
+import com.pisoft.mistborn_game.player.*;
+import com.pisoft.mistborn_game.player.platforming.*;
 
 public class StateManager {
     private Player targetPlayer; 
@@ -10,7 +11,7 @@ public class StateManager {
     public State getNextState(final State currentState) {
         State nextState = currentState;
 
-        switch (currentState) {
+        /*switch (currentState) {
             case IDLE:
                 if (targetPlayer.isGrounded()) {
                     if (targetPlayer.isCrouching()) {
@@ -281,9 +282,9 @@ public class StateManager {
                 // grounded, not crouching, not accelerating, wallPushing -> stay in AT_WALL
 
                 break;
-        }
+        }*/
 
-        /*if (targetPlayer.isGrounded()) {
+        if (targetPlayer.isGrounded()) {
             if (targetPlayer.isLanding()) {
                 nextState = State.LANDING;
             } else if (targetPlayer.isCrouching()) {
@@ -317,7 +318,7 @@ public class StateManager {
             } else {
                 nextState = State.FALLING;
             }
-        }*/
+        }
 
         return nextState;
     }
