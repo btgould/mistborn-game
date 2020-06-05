@@ -1,12 +1,8 @@
 package com.pisoft.mistborn_game;
 
-import java.util.ArrayList;
-
 import com.pisoft.mistborn_game.display.Display;
 import com.pisoft.mistborn_game.levels.Level;
-import com.pisoft.mistborn_game.levels.Metal;
-import com.pisoft.mistborn_game.levels.Platform;
-import com.pisoft.mistborn_game.player.Player;
+import com.pisoft.mistborn_game.levels.LoadedLevels;
 
 public class Game implements Runnable{
 	private Display display;
@@ -17,19 +13,14 @@ public class Game implements Runnable{
 	private Thread thread;
 	
 	private static Level activeLevel;
-	private Player player = new Player();
-	private ArrayList<Platform> platforms = new ArrayList<Platform>();
-    private ArrayList<Metal> metals = new ArrayList<Metal>();
 	
     //for debugging: increase delay between frames to read stat menu
 	private final int INTERVAL_DELAY = 1000 / 30;
 	
 	public Game() {
 		initResources();
-		initPlatforms();
-        initMetals();
-        
-        activeLevel = new Level(player, platforms, metals);
+		LoadedLevels.initLevels();
+		activeLevel = LoadedLevels.getLevel1();
         
 		display = new Display();
 	}
@@ -37,20 +28,6 @@ public class Game implements Runnable{
 	private void initResources() {
 		
 	}
-	
-	private void initPlatforms() {
-        // new Platform(xPos, yPos, width, height);
-        // new Platform(0, 300, 500, 50);
-        //this.platforms.add(new Platform(250, 100, 50, 500));
-        //this.platforms.add(new Platform(450, 100, 50, 500));
-        // new Platform(0, 100, 500, 50);
-        this.platforms.add(new Platform(0, 500, 1500, 50));
-    }
-
-    private void initMetals() {
-        //new Metal(xPos, yPos);
-        this.metals.add(new Metal(350, 525));
-    }
 	
 	public void run() {
 		initResources();
