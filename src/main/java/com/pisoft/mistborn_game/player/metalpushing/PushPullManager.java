@@ -3,7 +3,7 @@ package com.pisoft.mistborn_game.player.metalpushing;
 import java.awt.Point;
 import java.awt.event.InputEvent;
 
-import com.pisoft.mistborn_game.display.*;
+import com.pisoft.mistborn_game.Game;
 import com.pisoft.mistborn_game.levels.*;
 import com.pisoft.mistborn_game.player.Player;
 import com.pisoft.mistborn_game.player.controllers.*;
@@ -19,7 +19,7 @@ public class PushPullManager {
     public static void findTargetMetal() {
         Point mousePos = MouseTracker.getMousePoint();
 
-        for (Metal metal : Board.getLevel().getMetals()) {
+        for (Metal metal : Game.getActiveLevel().getMetals()) {
             if (Math.hypot(mousePos.x - metal.getxPos(), mousePos.y - metal.getyPos()) < 80) {
                 targetMetal = metal;
                 return;

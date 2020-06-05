@@ -3,6 +3,7 @@ package com.pisoft.mistborn_game.player.state;
 import java.awt.event.KeyEvent;
 
 import com.pisoft.mistborn_game.player.*;
+import com.pisoft.mistborn_game.player.controllers.KeyTracker;
 import com.pisoft.mistborn_game.player.platforming.*;
 
 public class StateManager {
@@ -11,7 +12,7 @@ public class StateManager {
     public State getNextState(final State currentState) {
         State nextState = currentState;
 
-        /*switch (currentState) {
+        switch (currentState) {
             case IDLE:
                 if (targetPlayer.isGrounded()) {
                     if (targetPlayer.isCrouching()) {
@@ -137,7 +138,7 @@ public class StateManager {
 
             case JUMPING:
                 // TODO: make this only State-oriented
-                if (!player.controllers.KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)
+                if (!KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)
                         || Math.abs(targetPlayer.getySpeed()) <= Math.abs(PlatformingConstants.getShortJumpSpeed())) {
                     targetPlayer.setySpeed(PlatformingConstants.getShortJumpSpeed());
 
@@ -282,9 +283,9 @@ public class StateManager {
                 // grounded, not crouching, not accelerating, wallPushing -> stay in AT_WALL
 
                 break;
-        }*/
+        }
 
-        if (targetPlayer.isGrounded()) {
+        /*if (targetPlayer.isGrounded()) {
             if (targetPlayer.isLanding()) {
                 nextState = State.LANDING;
             } else if (targetPlayer.isCrouching()) {
@@ -318,7 +319,7 @@ public class StateManager {
             } else {
                 nextState = State.FALLING;
             }
-        }
+        }*/
 
         return nextState;
     }

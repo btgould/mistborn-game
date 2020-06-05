@@ -7,6 +7,6 @@
  - jdk (I am currently using OpenJDK v11.0.7)
 
 **Notes:**
- - Main method found in `Display` class under package `display`
+ - Main method found in `Launcher` class in main package
  - `PlatformingConstants` class in package `player.platforming` contains useful variables to modify platforming feel
- - `Board` class in package `display` contains a variable to change frame rate for debugging purposes 
+ - `Game` class in main package contains a variable to change frame rate for debugging purposes 

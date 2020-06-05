@@ -2,6 +2,7 @@ package com.pisoft.mistborn_game.display;
 
 import javax.swing.JPanel;
 
+import com.pisoft.mistborn_game.Game;
 import com.pisoft.mistborn_game.levels.*;
 import com.pisoft.mistborn_game.player.Player;
 
@@ -13,7 +14,7 @@ import com.pisoft.mistborn_game.player.metalpushing.PushPullManager;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Color;
-import java.util.ArrayList;
+
 //animation imports
 import java.awt.Toolkit;
 
@@ -21,27 +22,15 @@ public class Board extends JPanel {
 
     private static final long serialVersionUID = -3991296469087660042L;
 
-    private Player player = new Player();
+    private Player player = Game.getActiveLevel().getPlayer();
 
     private final int WIDTH = 500;
     private final int HEIGHT = 500;
 
-    //for debugging: increase delay between frames to read stat menu
-    private final int INTERVAL_DELAY = 1000 / 30;
-
     //TODO: find a better place to initialize
-    //make level non-static
-    private static Level level;
-    private ArrayList<Platform> platforms = new ArrayList<Platform>();
-    private ArrayList<Metal> metals = new ArrayList<Metal>();
     private Painter painter = new Painter();
 
-
     public Board() {
-        initPlatforms();
-        initMetals();
-        level = new Level(this.player, this.platforms, this.metals);
-
         initBoard();
     }
 
@@ -58,53 +47,6 @@ public class Board extends JPanel {
         addMouseMotionListener(mouseTracker);
 
         setFocusable(true);
-
-        LevelThread thread = new LevelThread();
-        thread.start();
-    }
-
-    private void initPlatforms() {
-        // new Platform(xPos, yPos, width, height);
-        // new Platform(0, 300, 500, 50);
-        //this.platforms.add(new Platform(250, 100, 50, 500));
-        //this.platforms.add(new Platform(450, 100, 50, 500));
-        // new Platform(0, 100, 500, 50);
-        this.platforms.add(new Platform(0, 500, 1500, 50));
-    }
-
-    private void initMetals() {
-        //new Metal(xPos, yPos);
-        this.metals.add(new Metal(350, 525));
-    }
-
-    //animation timing
-    //---------------------------------------------------------------------------------------------------
-    private class LevelThread extends Thread {
-        @Override
-        public void run() {
-    
-            long beforeTime, timeDiff, sleep;
-    
-            beforeTime = System.currentTimeMillis();
-    
-            while (true) {
-                player.tick();
-                repaint();
-    
-                timeDiff = System.currentTimeMillis() - beforeTime;
-                sleep = INTERVAL_DELAY - timeDiff;
-    
-                if (sleep < 0) {
-                    sleep = 2;
-                }
-    
-                try {
-                    Thread.sleep(sleep);
-                } catch (InterruptedException e) {};
-    
-                beforeTime = System.currentTimeMillis();
-            }
-        }
     }
 
     //drawing
@@ -114,7 +56,7 @@ public class Board extends JPanel {
         //paint background
         super.paintComponent(g);
 
-        painter.paintLevel(g, level);
+        painter.paintLevel(g, Game.getActiveLevel());
 
         Toolkit.getDefaultToolkit().sync();
 
@@ -158,14 +100,6 @@ public class Board extends JPanel {
 
     //getters and setters
     //---------------------------------------------------------------------------------------------------
-    public static Level getLevel() {
-        return level;
-    }
-
-    public void setLevel(Level level) {
-        Board.level = level;
-    }
-
     public int getOne() {
         return 1;
     }

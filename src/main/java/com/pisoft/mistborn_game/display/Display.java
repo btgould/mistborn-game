@@ -13,6 +13,9 @@ public class Display extends JFrame {
 
     private static final long serialVersionUID = 3129809478408754800L;
     
+    private JFrame frame;
+    private Board board;
+    
     private Dimension appSize = new Dimension();
     private Dimension screenSize = new Dimension();
 
@@ -25,18 +28,19 @@ public class Display extends JFrame {
     //initialization
     //---------------------------------------------------------------------------------------------------
     private void initUI() {
-        Board board = new Board();
-        add(board);
+    	frame = new JFrame();
+        board = new Board();
+        frame.add(board);
 
-        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        this.setMinimumSize(new Dimension(800, 450));
-        this.setVisible(true);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setMinimumSize(new Dimension(800, 450));
+        frame.setVisible(true);
 
-        setTitle("Mistborn Game");
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setTitle("Mistborn Game");
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        this.appSize = this.getContentPane().getSize();
+        this.appSize = frame.getContentPane().getSize();
         this.screenSize.setSize(this.appSize);
 
         this.addComponentListener(new ComponentAdapter() {
@@ -52,7 +56,7 @@ public class Display extends JFrame {
     // things to detect when app size changes
     // -----------------------------------------------------------------------------------------------
     private void updateScale() {
-        appSize = this.getContentPane().getSize();
+        appSize = frame.getContentPane().getSize();
 
         // TODO: this feels sloppy
         if (this.appSize.getHeight() > this.screenSize.getHeight()
@@ -64,9 +68,13 @@ public class Display extends JFrame {
         this.scale = this.appSize.getHeight() / screenSize.getHeight();
     }
 
-    public static void main(String[] args) {
-        EventQueue.invokeLater(() -> {
-            Display window = new Display();
-        });
-    }
+    //getters and setters
+    // -----------------------------------------------------------------------------------------------
+    public Board getBoard() {
+		return board;
+	}
+
+	public void setBoard(Board board) {
+		this.board = board;
+	}
 }
