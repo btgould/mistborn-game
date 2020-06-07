@@ -29,6 +29,7 @@ public class PushPullManager {
         }
     }
 
+    //TODO: make this return a Point instead of directly set variables 
     public void setSteelPush() {
         if (targetMetal != null && MouseTracker.getButtonsPressed().contains(InputEvent.BUTTON1_MASK)) {
             //set xPush and yPush based off of player data

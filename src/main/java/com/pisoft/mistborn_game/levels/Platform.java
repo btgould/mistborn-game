@@ -1,9 +1,6 @@
 package com.pisoft.mistborn_game.levels;
 
-import java.util.ArrayList;
-
 //import to scale drawings
-//import display.Display;
 
 public class Platform {
 
@@ -13,15 +10,11 @@ public class Platform {
     private double width;
     private double height;
 
-    private static ArrayList<Platform> platforms = new ArrayList<Platform>();
-
     public Platform(double xPos, double yPos, double width, double height) {
         this.xPos = xPos;
         this.yPos = yPos;
         this.width = width;
         this.height = height;
-
-        platforms.add(this);
     }
 
     //getters and setters
@@ -56,13 +49,5 @@ public class Platform {
 
     public void setHeight(double height) {
         this.height = height;
-    }
-
-    public static ArrayList<Platform> getPlatforms() {
-        return platforms;
-    }
-
-    public static void setPlatforms(ArrayList<Platform> platforms) {
-        Platform.platforms = platforms;
     }
 }

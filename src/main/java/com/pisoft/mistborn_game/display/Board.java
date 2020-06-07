@@ -3,7 +3,6 @@ package com.pisoft.mistborn_game.display;
 import javax.swing.JPanel;
 
 import com.pisoft.mistborn_game.Game;
-import com.pisoft.mistborn_game.levels.*;
 import com.pisoft.mistborn_game.player.Player;
 
 //event listening imports

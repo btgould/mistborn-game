@@ -137,7 +137,7 @@ public class StateManager {
                 break;
 
             case JUMPING:
-                // TODO: make this only State-oriented
+                // TODO: make this only condition-oriented
                 if (!KeyTracker.getKeysPressed().contains(KeyEvent.VK_UP)
                         || Math.abs(targetPlayer.getySpeed()) <= Math.abs(PlatformingConstants.getShortJumpSpeed())) {
                     targetPlayer.setySpeed(PlatformingConstants.getShortJumpSpeed());

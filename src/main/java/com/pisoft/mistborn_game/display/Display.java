@@ -2,7 +2,6 @@ package com.pisoft.mistborn_game.display;
 
 //imports needed for swing
 import javax.swing.JFrame;
-import java.awt.EventQueue; //b/c swing not thread safe
 
 //imports to keep track of screen size
 import java.awt.Dimension;

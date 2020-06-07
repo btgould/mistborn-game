@@ -2,6 +2,7 @@ package com.pisoft.mistborn_game.player;
 
 import java.awt.event.KeyEvent;
 
+import com.pisoft.mistborn_game.Game;
 import com.pisoft.mistborn_game.levels.Platform;
 import com.pisoft.mistborn_game.player.controllers.*;
 import com.pisoft.mistborn_game.player.metalpushing.PushPullManager;
@@ -49,6 +50,7 @@ public class Player {
 
     private Side wallSide;
     private Side lastWallJumpSide;
+    private Side facingSide;
 
     private State state;
     // -----------------------------------------------------------------------------------------------
@@ -626,8 +628,7 @@ public class Player {
     // returns true if overlapping with a platform
     private boolean collided() {
         // check every platform for collision
-        for (int platNum = 0; platNum < Platform.getPlatforms().size(); platNum++) {
-            Platform platform = Platform.getPlatforms().get(platNum);
+        for (Platform platform : Game.getActiveLevel().getPlatforms()) {
             boolean onSameX = false;
             boolean onSameY = false;
 
@@ -980,5 +981,13 @@ public class Player {
 
 	public void setCanDoubleJump(boolean canDoubleJump) {
 		this.canDoubleJump = canDoubleJump;
+	}
+
+	public Side getFacingSide() {
+		return facingSide;
+	}
+
+	public void setFacingSide(Side facingSide) {
+		this.facingSide = facingSide;
 	}
 }
