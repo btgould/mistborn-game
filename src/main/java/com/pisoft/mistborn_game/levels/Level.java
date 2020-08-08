@@ -2,32 +2,32 @@ package com.pisoft.mistborn_game.levels;
 
 import java.util.ArrayList;
 
-import com.pisoft.mistborn_game.player.Player;
+import com.pisoft.mistborn_game.player.PlayerController;
 
 //TODO: add items, enemies, etc.
 public class Level {
-    
-    private Player player = new Player();
 
+	private PlayerController playerController;
+	
     private ArrayList<Platform> platforms = new ArrayList<Platform>();
     private ArrayList<Metal> metals = new ArrayList<Metal>();
     
-    public Level(Player player, ArrayList<Platform> platforms, ArrayList<Metal> metals) {
-        setPlayer(player);
-        setPlatforms(platforms);
+    public Level(ArrayList<Platform> platforms, ArrayList<Metal> metals) {
+        setPlayerController(new PlayerController());
+    	setPlatforms(platforms);
         setMetals(metals);
     }
 
     //getters and setters
     //---------------------------------------------------------------------------------------------------
-    public Player getPlayer() {
-        return player;
-    }
+    public PlayerController getPlayerController() {
+		return playerController;
+	}
 
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
-
+	public void setPlayerController(PlayerController playerController) {
+		this.playerController = playerController;
+	}
+    
     public ArrayList<Platform> getPlatforms() {
         return platforms;
     }

@@ -11,13 +11,11 @@ import java.awt.geom.Rectangle2D;
 import com.pisoft.mistborn_game.levels.*;
 import com.pisoft.mistborn_game.player.Player;
 
-//TODO: paint only objects onscreen
-//TODO: add methods to paint menus
 public class Painter {
 
     public void paintLevel(Graphics g, Level level) {
         //paint player
-        paintPlayer(g, level.getPlayer());
+        paintPlayer(g, level.getPlayerController().getPlayer());
         
         //paint platforms
         for (int i = 0; i < level.getPlatforms().size(); i++) {

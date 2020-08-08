@@ -12,8 +12,7 @@ public class Display extends JFrame {
 
     private static final long serialVersionUID = 3129809478408754800L;
     
-    private JFrame frame;
-    private Board board;
+    private Board board = new Board();
     
     private Dimension appSize = new Dimension();
     private Dimension screenSize = new Dimension();
@@ -27,19 +26,17 @@ public class Display extends JFrame {
     //initialization
     //---------------------------------------------------------------------------------------------------
     private void initUI() {
-    	frame = new JFrame();
-        board = new Board();
-        frame.add(board);
+        add(board);
 
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setMinimumSize(new Dimension(800, 450));
-        frame.setVisible(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setMinimumSize(new Dimension(800, 450));
+        setVisible(true);
 
-        frame.setTitle("Mistborn Game");
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("Mistborn Game");
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        this.appSize = frame.getContentPane().getSize();
+        this.appSize = getContentPane().getSize();
         this.screenSize.setSize(this.appSize);
 
         this.addComponentListener(new ComponentAdapter() {
@@ -51,11 +48,12 @@ public class Display extends JFrame {
             }
         });
     }
+    
 
     // things to detect when app size changes
     // -----------------------------------------------------------------------------------------------
     private void updateScale() {
-        appSize = frame.getContentPane().getSize();
+        appSize = getContentPane().getSize();
 
         // TODO: this feels sloppy
         if (this.appSize.getHeight() > this.screenSize.getHeight()

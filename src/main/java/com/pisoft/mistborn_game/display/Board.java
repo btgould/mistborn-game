@@ -1,105 +1,336 @@
 package com.pisoft.mistborn_game.display;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.AbstractAction;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 import com.pisoft.mistborn_game.Game;
 import com.pisoft.mistborn_game.player.Player;
+import com.pisoft.mistborn_game.player.Side;
+import com.pisoft.mistborn_game.player.intents.*;
 
-//event listening imports
-import com.pisoft.mistborn_game.player.controllers.*;
-import com.pisoft.mistborn_game.player.metalpushing.PushPullManager;
+public class Board extends JPanel implements IntentDispatcher {
 
-//drawing imports
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Color;
+	private static final long serialVersionUID = -3991296469087660042L;
 
-//animation imports
-import java.awt.Toolkit;
+	private Player player = Game.getActiveLevel().getPlayerController().getPlayer();
 
-public class Board extends JPanel {
+	private final int WIDTH = 500;
+	private final int HEIGHT = 500;
 
-    private static final long serialVersionUID = -3991296469087660042L;
+	private Painter painter = new Painter();
+	
+//	private boolean eventTest = false;
 
-    private Player player = Game.getActiveLevel().getPlayer();
+	public Board() {
+		initBoard();
+		initKeyBindings();
+	}
 
-    private final int WIDTH = 500;
-    private final int HEIGHT = 500;
+	// initialization
+	// ---------------------------------------------------------------------------------------------------
+	private void initBoard() {
+		setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
-    //TODO: find a better place to initialize
-    private Painter painter = new Painter();
+		addIntentListener(Game.getActiveLevel().getPlayerController().getIntentParser());
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if ((e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) == MouseEvent.BUTTON1_DOWN_MASK) {
+					dispatchIntent(new SteelPushIntent(e.getPoint()));
+				}
 
-    public Board() {
-        initBoard();
-    }
+				if ((e.getModifiersEx() & MouseEvent.BUTTON3_DOWN_MASK) == MouseEvent.BUTTON3_DOWN_MASK) {
+					// ironPull here				
+				}
+			}
 
-    //initialization
-    //---------------------------------------------------------------------------------------------------
-    private void initBoard() {
-        setPreferredSize(new Dimension(WIDTH, HEIGHT));
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if ((e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != MouseEvent.BUTTON1_DOWN_MASK) {
+					dispatchIntent(new StopSteelPushIntent());
+				}
 
-        KeyTracker keyTracker = new KeyTracker();
-        MouseTracker mouseTracker = new MouseTracker();
+				if ((e.getModifiersEx() & MouseEvent.BUTTON3_DOWN_MASK) != MouseEvent.BUTTON3_DOWN_MASK) {
+					// stop ironPull here
+				}
+			}
+		});
+		
+		/*this.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+					eventTest = true;
+				}
+			}
+		});*/
 
-        addKeyListener(keyTracker);
-        addMouseListener(mouseTracker);
-        addMouseMotionListener(mouseTracker);
+		setFocusable(true);
+	}
 
-        setFocusable(true);
-    }
+	private void initKeyBindings() {
+		// TODO: figure out how to map shift explicitly
+		// add bindings with shift mask
+		getInputMap().put(KeyStroke.getKeyStroke("UP"), "Jump Intent");
+		getInputMap().put(KeyStroke.getKeyStroke("LEFT"), "Acc Left Intent");
+		getInputMap().put(KeyStroke.getKeyStroke("RIGHT"), "Acc Right Intent");
+		getInputMap().put(KeyStroke.getKeyStroke("DOWN"), "Crouch Intent");
+		getInputMap().put(KeyStroke.getKeyStroke("Z"), "Prep Run Intent");
+		// getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_SHIFT, 0), "Prep Run Intent");
+		getInputMap().put(KeyStroke.getKeyStroke("released UP"), "Stop Jump Intent");
+		getInputMap().put(KeyStroke.getKeyStroke("released LEFT"), "Stop Acc Left Intent");
+		getInputMap().put(KeyStroke.getKeyStroke("released RIGHT"), "Stop Acc Right Intent");
+		getInputMap().put(KeyStroke.getKeyStroke("released DOWN"), "Stop Crouch Intent");
+		getInputMap().put(KeyStroke.getKeyStroke("released Z"), "Stop Prep Run Intent");
 
-    //drawing
-    //---------------------------------------------------------------------------------------------------
-    @Override
-    protected void paintComponent(Graphics g) {
-        //paint background
-        super.paintComponent(g);
+		// start actions
+		getActionMap().put("Jump Intent", new AbstractAction() {
+			private static final long serialVersionUID = 1L;
 
-        painter.paintLevel(g, Game.getActiveLevel());
+			public void actionPerformed(ActionEvent e) {
+				dispatchIntent(new JumpIntent());
+			}
+		});
 
-        Toolkit.getDefaultToolkit().sync();
+		getActionMap().put("Acc Left Intent", new AbstractAction() {
+			private static final long serialVersionUID = 1L;
 
-        //for debug purposes
-        //-----------------------------------------------------------------------------------------------
-        g.setColor(Color.black);
-        g.drawString("Keys Pressed: " + KeyTracker.getKeysPressed(), 10, 10);
-        g.drawString("Player State: " + player.getState(), 10, 30);
+			public void actionPerformed(ActionEvent e) {
+				dispatchIntent(new AccelerateIntent(Side.LEFT));
+			}
+		});
 
-        g.drawString("xPos: " + player.getxPos(), 10, 50);
-        g.drawString("yPos: " + player.getyPos(), 10, 70);
-        g.drawString("xSpeed: " + player.getxSpeed(), 10, 90);
-        g.drawString("ySpeed: " + player.getySpeed(), 10, 110);
+		getActionMap().put("Acc Right Intent", new AbstractAction() {
+			private static final long serialVersionUID = 1L;
 
-        g.drawString("Accelerating: " + player.isAccelerating(), 200, 10);
-        g.drawString("Can Run: " + player.getCanRun(), 200, 30);
-        g.drawString("Sliding: " + player.isSliding(), 200, 50);
-        
-        g.drawString("Grounded: " + player.isGrounded(), 200, 70);
-        g.drawString("Landing: " + player.isLanding(), 200, 90);
-        g.drawString("Jumping: " + player.isJumping(), 200, 110);
-        g.drawString("Double Jumping: " + player.isDoubleJumping(), 200, 130);
-        g.drawString("Wall Jumping: " + player.isWallJumping(), 200, 150);
-        g.drawString("Falling: " + player.isFalling(), 200, 170);
-        
-        g.drawString("Crouching: " + player.isCrouching(), 200, 190);
-        g.drawString("At Wall: " + player.isAtWall(), 200, 210);
-        g.drawString("Wall pushing: " + player.isWallPushing(), 200, 230);
-        
-        g.drawString("Mouse Position: " + MouseTracker.getMousePoint(), 400, 10);
-        g.drawString("Mouse Buttons Pressed: " + MouseTracker.getButtonsPressed(), 400, 30);
+			public void actionPerformed(ActionEvent e) {
+				dispatchIntent(new AccelerateIntent(Side.RIGHT));
+				// eventTest = true;
+			}
+		});
 
-        try {
-            g.drawString("Target Metal xPos: " + PushPullManager.getTargetMetal().getxPos(), 800, 10);
-            g.drawString("Target Metal yPos: " + PushPullManager.getTargetMetal().getyPos(), 800, 30);
-        } catch (NullPointerException e) {
-            g.drawString("Target Metal xPos: null", 800, 10);
-            g.drawString("Target Metal yPos: null", 800, 30);
-        };
-    }
+		getActionMap().put("Crouch Intent", new AbstractAction() {
+			private static final long serialVersionUID = 1L;
 
-    //getters and setters
-    //---------------------------------------------------------------------------------------------------
-    public int getOne() {
-        return 1;
-    }
+			public void actionPerformed(ActionEvent e) {
+				dispatchIntent(new CrouchIntent());
+			}
+		});
+
+		getActionMap().put("Prep Run Intent", new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				dispatchIntent(new PrepRunIntent());
+			}
+		});
+
+		// stop actions
+		getActionMap().put("Stop Jump Intent", new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				dispatchIntent(new StopJumpIntent());
+			}
+		});
+
+		getActionMap().put("Stop Acc Left Intent", new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				dispatchIntent(new StopAccIntent(Side.LEFT));
+			}
+		});
+
+		getActionMap().put("Stop Acc Right Intent", new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				dispatchIntent(new StopAccIntent(Side.RIGHT));
+			}
+		});
+
+		getActionMap().put("Stop Crouch Intent", new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				dispatchIntent(new StopCrouchIntent());
+			}
+		});
+
+		getActionMap().put("Stop Prep Run Intent", new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				dispatchIntent(new StopPrepRunIntent());
+			}
+		});
+	}
+
+	// drawing
+	// ---------------------------------------------------------------------------------------------------
+	@Override
+	protected void paintComponent(Graphics g) {
+		// paint background
+		super.paintComponent(g);
+
+		painter.paintLevel(g, Game.getActiveLevel());
+
+		Toolkit.getDefaultToolkit().sync();
+
+		// for debug purposes
+		// -----------------------------------------------------------------------------------------------
+		g.setColor(Color.black);
+		
+		DebugPrinter dp = new DebugPrinter(g, 10, 10); 
+		
+		dp.printMessage("Player State: " + player.getState());
+		dp.printMessage("xPos: " + player.getxPos());
+		dp.printMessage("yPos: " + player.getyPos());
+		dp.printMessage("xSpeed: " + player.getxSpeed());
+		dp.printMessage("ySpeed: " + player.getySpeed());
+		dp.printMessage("xAcc: " + player.getxAcc());
+		dp.printMessage("yAcc: " + player.getyAcc());
+		dp.printMessage("xPushAmount: " + player.getxPushAmount());
+		dp.printMessage("yPushAmount: " + player.getyPushAmount());
+
+		dp.nextColumn(250);
+		
+		dp.printMessage("Facing Side: " + player.getFacingSide());
+		dp.printMessage("Wants to Acc: " +  player.wantsToAccelerate());
+		dp.printMessage("Accelerating: " + player.isAccelerating());
+		dp.printMessage("Walking: " + player.isWalking());
+		dp.printMessage("Running: " + player.isRunning());
+		dp.printMessage("Can Run: " + player.getCanRun());
+		dp.printMessage("Sliding: " + player.isSliding());
+		dp.printMessage("Crouching: " + player.isCrouching());
+		
+		dp.nextColumn(150);
+
+		dp.printMessage("Grounded: " + player.isGrounded());
+		dp.printMessage("Falling: " + player.isFalling());
+		dp.printMessage("Landing: " + player.isLanding());
+		dp.blankLine(5);
+		dp.printMessage("Can Jump: " + player.canJump());
+		dp.printMessage("Jumping: " + player.isJumping());
+		dp.blankLine(5);
+		dp.printMessage("Can Double Jump: " + player.canDoubleJump());
+		dp.printMessage("Double Jumping: " + player.isDoubleJumping());
+		dp.blankLine(5);
+		dp.printMessage("Last Wall Jump Side: " + player.getLastWallJumpSide());
+		dp.printMessage("Wall Jumping: " + player.isWallJumping());
+		dp.blankLine(5);
+		dp.printMessage("Jump Released: " + player.isJumpReleased());
+		
+		dp.nextColumn(150);
+		
+		dp.printMessage("At Wall: " + player.isAtWall());
+		dp.printMessage("Wall Side: " + player.getWallSide());
+		dp.printMessage("Wall pushing: " + player.isWallPushing());
+		
+		dp.nextColumn(150);
+		
+		dp.printMessage("Steel Pushing: " + player.isSteelPushing());
+		try {
+			dp.printMessage("Target Metal: " + player.getTargetMetal().getxPos() + ", " + player.getTargetMetal().getyPos());
+		} catch (NullPointerException e) {
+			dp.printMessage("Target Metal: null");
+		}
+		
+//		g.drawString("Queued Actions: ", 700, 10);
+//		int vertOffset = 10;
+//		for (PlayerAction action : Game.getActiveLevel().getPlayerController().getPlayerActionResolver().getQueuedActions()) {
+//			g.drawString(action.getClass().getSimpleName(), 805, vertOffset);
+//			vertOffset += 20;
+//		}
+//		Game.getActiveLevel().getPlayerController().getPlayerActionResolver().getQueuedActions().clear();
+		
+//		g.drawString("Event Test: " + eventTest, 900, 10);
+//		eventTest = false;
+		
+		g.dispose();
+	}
+	
+	// debug stuffs
+	// ---------------------------------------------------------------------------------------------------
+	/**
+	 * A class to simplify the real time printing of debug messages to the screen.<p>
+	 * Contains methods to easily format message placement on the screen.
+	 * 
+	 * @author gouldb
+	 *
+	 */
+	private class DebugPrinter {
+		
+		private Graphics g;
+		
+		private int x, y, xOffset, yOffset;
+		
+		/**
+		 * Simple constructor for the <code>DebugPrinter</code> class
+		 * 
+		 * 
+		 * @param g The <code>Graphics</code>  object to be used to draw the messages
+		 * @param x Starting x coordinate for message location
+		 * @param y Starting y coordinate for message location 
+		 */
+		private DebugPrinter(Graphics g, int x, int y) { 
+			this.g = g;
+			this.x = x;
+			this.y = y;
+			
+			xOffset = 0;
+			yOffset = 0;
+		}
+		
+		/**
+		 * Prints a message to the screen at the current message location,
+		 * and increments the y coordinate of the message location to prevent 
+		 * messages from being printed on top of each other.
+		 * 
+		 * @param message The message to print onto the screen
+		 */
+		private void printMessage(String message) {
+			g.drawString(message, x + xOffset, y + yOffset);
+			
+			yOffset += 20;
+		}
+		
+		/**
+		 * Moves message location to the top of a new column, allowing for easy 
+		 * grouping of debug messages by column.
+		 * 
+		 * @param offset The x coordinate distance between the old and new columns
+		 * 
+		 */
+		private void nextColumn(int offset) {
+			xOffset += offset;
+			yOffset = 0;
+		}
+		
+		/**
+		 * Prints a blank line, allowing for easy subdivision of messages in the same 
+		 * column.
+		 * 
+		 * @param offset The y coordinate size of the blank line
+		 */
+		private void blankLine(int offset) {
+			yOffset += offset;
+		}
+	}
+
+	// getters and setters
+	// ---------------------------------------------------------------------------------------------------
+	public int getOne() {
+		return 1;
+	}
 }
