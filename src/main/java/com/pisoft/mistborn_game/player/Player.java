@@ -55,6 +55,8 @@ public class Player implements GameEventDispatcher {
 
 	private Metal targetMetal;
 	private boolean steelPushing;
+	
+	private Platform collidedPlatform;
 
 	// -----------------------------------------------------------------------------------------------
 	public Player() {
@@ -124,6 +126,7 @@ public class Player implements GameEventDispatcher {
 
 			// if player is in the same space as any platform, return true
 			if (onSameX && onSameY) {
+				setCollidedPlatform(platform);
 				return true;
 			}
 		}
@@ -131,89 +134,82 @@ public class Player implements GameEventDispatcher {
 		// false
 		return false;
 	}
+	
+	private boolean collided(Platform platform) {
+		boolean onSameX = false;
+		boolean onSameY = false;
+
+		if (this.xPos + this.width + 2 > platform.getxPos()
+				&& platform.getxPos() + platform.getWidth() + 2 > this.xPos) {
+			onSameX = true;
+		}
+
+		if (this.yPos + this.height + 2 > platform.getyPos()
+				&& platform.getyPos() + platform.getHeight() + 2 > this.yPos) {
+			onSameY = true;
+		}
+
+		// if player is in the same space as this platform, return true
+		if (onSameX && onSameY) {
+			setCollidedPlatform(platform);
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	private void handleCollision() {
-		if (collided()) {
-			double slope = Math.abs(this.ySpeed / this.xSpeed);
-
-			double xOffset = 0;
-			double yOffset = 0;
-
-			int xTickAmount;
-			int yTickAmount;
-
-			if (this.xSpeed != 0) {
-				xTickAmount = (this.xSpeed > 0) ? -1 : 1;
-			} else {
-				xTickAmount = 0;
-			}
-
-			if (this.ySpeed != 0) {
-				yTickAmount = (this.ySpeed > 0) ? -1 : 1;
-			} else {
-				yTickAmount = 0;
-			}
+		// need while loop here in case player collides with more than one platform in the same frame 
+		while (collided()) {
 
 			boolean causedByX = false;
 			boolean causedByY = false;
 
 			this.xPos -= this.xSpeed;
-			if (collided()) {
-				// collision caused by y movement
+			if (collided(getCollidedPlatform())) {
+				// collided without x movement --> collision caused by y movement
 				causedByY = true;
 			}
 			this.xPos += this.xSpeed;
 			this.yPos -= this.ySpeed;
-			if (collided()) {
-				// collision caused by x movement
+			if (collided(getCollidedPlatform())) {
+				// collided without y movement --> collision caused by x movement
 				causedByX = true;
 			}
 			this.yPos += this.ySpeed;
-
+			
+			// collided because of combination of x + y movement, determine based on speed
+			if (!causedByX && !causedByY) {
+				causedByX = Math.abs(getySpeed()) > Math.abs(getxSpeed());
+				causedByY = !causedByX;
+			}
+			
 			if (causedByX) {
-				this.xPos = Math.round(this.xPos);
-			}
-			if (causedByY) {
-				this.yPos = Math.round(this.yPos);
-			}
-
-			while (collided()) {
-				if (xOffset == 0 && yOffset == 0) {
-					if (slope >= 1) {
-						// tick y
-						this.yPos += yTickAmount;
-						yOffset++;
-					} else {
-						// works b/c both cannot be 0, or player would never collide
-						// tick x
-						this.xPos += xTickAmount;
-						xOffset++;
-					}
-				} else if (yOffset / xOffset >= slope) {
-					// tick x
-					this.xPos += xTickAmount;
-					xOffset++;
+				// player hit a wall
+				if (getxSpeed() > 0) {
+					setxPos(getCollidedPlatform().getxPos() - getWidth() - 2);
 				} else {
-					// tick y
-					this.yPos += yTickAmount;
-					yOffset++;
+					setxPos(getCollidedPlatform().getxPos() + getCollidedPlatform().getWidth() + 2);
 				}
+				
+				Side direction = (getxSpeed() > 0) ? Side.RIGHT : Side.LEFT;
+				dispatchEvent(new HitWallEvent(direction));
 			}
-
+			
 			if (causedByY) {
 				// player hit a floor or a ceiling
 				if (this.ySpeed > 0) {
+					setyPos(getCollidedPlatform().getyPos() - getHeight() - 2);
+					
 					dispatchEvent(new HitFloorEvent());
 				} else {
+					setyPos(getCollidedPlatform().getyPos() + getCollidedPlatform().getHeight() + 2);
+					
 					dispatchEvent(new HitCeilingEvent());
 				}
 			}
 
-			if (causedByX) {
-				// player hit a wall
-				Side direction = (getxSpeed() > 0) ? Side.RIGHT : Side.LEFT;
-				dispatchEvent(new HitWallEvent(direction));
-			}
+			setCollidedPlatform(null);
 		}
 	}
 
@@ -580,5 +576,13 @@ public class Player implements GameEventDispatcher {
 
 	public void setHeight(double height) {
 		this.height = height;
+	}
+
+	public Platform getCollidedPlatform() {
+		return collidedPlatform;
+	}
+
+	public void setCollidedPlatform(Platform collidedPlatform) {
+		this.collidedPlatform = collidedPlatform;
 	}
 }
