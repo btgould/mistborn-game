@@ -14,8 +14,9 @@ public class Game implements Runnable {
 
 	private static Level activeLevel;
 
-	// for debugging: increase delay between frames to read stat menu
-	private final int INTERVAL_DELAY = 1000 / 30;
+	// for debugging: increase delay between ticks to read stat menu
+	private final int TICK_DELAY = (int) Math.pow(10, 9) / 30;
+	private final int PRINT_DELAY = (int) Math.pow(10, 9);
 
 	public Game() {
 		initResources();
@@ -30,31 +31,33 @@ public class Game implements Runnable {
 	}
 
 	public void run() {
+		long lastTickTime = System.nanoTime();
+		long lastPrintTime = System.nanoTime();
+		int numTicks = 0, numRenders = 0;
 
 		while (running) {
+			
 			switch (state) {
 			case PLAYING:
-				long beforeTime, timeDiff, sleep;
-
-				beforeTime = System.currentTimeMillis();
-
-				tick();
+				
+				long currentTime = System.nanoTime();
+				
 				render();
-
-				timeDiff = System.currentTimeMillis() - beforeTime;
-				sleep = INTERVAL_DELAY - timeDiff;
-
-				if (sleep < 0) {
-					sleep = 2;
+				numRenders++;
+				
+				if (currentTime - lastTickTime >=  TICK_DELAY) {
+					lastTickTime = currentTime;
+					tick();
+					numTicks++;
 				}
-
-				try {
-					Thread.sleep(sleep);
-				} catch (InterruptedException e) {
+				
+				if (currentTime - lastPrintTime >= PRINT_DELAY) {
+					lastPrintTime = currentTime;
+					System.out.println("FPS: " + numRenders + ", " + "Ticks: " + numTicks);
+					numTicks = 0;
+					numRenders = 0;
 				}
-				;
-
-				beforeTime = System.currentTimeMillis();
+				
 				break;
 
 			default:

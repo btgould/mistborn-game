@@ -14,6 +14,7 @@ public class StartFallEvent extends GameEvent {
 		
 		targetPlayer.setWalking(false);
 		targetPlayer.setRunning(false);
+		targetPlayer.setSliding(false);
 		
 		if (targetPlayer.wantsToAccelerate()) {
 			PlayerAction sideEffect = new AirAccAction(targetPlayer.getFacingSide());

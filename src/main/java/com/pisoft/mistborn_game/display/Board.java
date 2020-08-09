@@ -267,7 +267,6 @@ public class Board extends JPanel implements IntentDispatcher {
 	 * Contains methods to easily format message placement on the screen.
 	 * 
 	 * @author gouldb
-	 *
 	 */
 	private class DebugPrinter {
 		
@@ -310,7 +309,6 @@ public class Board extends JPanel implements IntentDispatcher {
 		 * grouping of debug messages by column.
 		 * 
 		 * @param offset The x coordinate distance between the old and new columns
-		 * 
 		 */
 		private void nextColumn(int offset) {
 			xOffset += offset;

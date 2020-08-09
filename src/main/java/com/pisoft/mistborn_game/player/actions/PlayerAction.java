@@ -5,7 +5,7 @@ import com.pisoft.mistborn_game.player.game_events.GameEvent;
 public abstract class PlayerAction extends GameEvent {
 	
 	private int priority;
-		
+
 	// getters and setters
 	// ---------------------------------------------------------------------------------------------------
 	public int getPriority() {
