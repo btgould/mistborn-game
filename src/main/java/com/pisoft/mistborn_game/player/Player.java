@@ -1,10 +1,25 @@
 package com.pisoft.mistborn_game.player;
 
+import java.util.ArrayList;
+
 import com.pisoft.mistborn_game.Game;
 import com.pisoft.mistborn_game.levels.Metal;
 import com.pisoft.mistborn_game.levels.Platform;
-import com.pisoft.mistborn_game.player.constants.*;
-import com.pisoft.mistborn_game.player.game_events.*;
+import com.pisoft.mistborn_game.player.constants.MetalPushingConstants;
+import com.pisoft.mistborn_game.player.constants.PlatformingConstants;
+import com.pisoft.mistborn_game.player.game_events.GameEventDispatcher;
+import com.pisoft.mistborn_game.player.game_events.GameEventListener;
+import com.pisoft.mistborn_game.player.game_events.HitCeilingEvent;
+import com.pisoft.mistborn_game.player.game_events.HitFloorEvent;
+import com.pisoft.mistborn_game.player.game_events.HitWallEvent;
+import com.pisoft.mistborn_game.player.game_events.JumpPeakedEvent;
+import com.pisoft.mistborn_game.player.game_events.LeavingWallEvent;
+import com.pisoft.mistborn_game.player.game_events.MaxAirSpeedReachedEvent;
+import com.pisoft.mistborn_game.player.game_events.MaxRunSpeedReachedEvent;
+import com.pisoft.mistborn_game.player.game_events.MaxWalkSpeedReachedEvent;
+import com.pisoft.mistborn_game.player.game_events.SlidingEvent;
+import com.pisoft.mistborn_game.player.game_events.SlowToWalkEvent;
+import com.pisoft.mistborn_game.player.game_events.StartFallEvent;
 import com.pisoft.mistborn_game.player.state.State;
 import com.pisoft.mistborn_game.player.state.StateManager;
 
@@ -16,9 +31,13 @@ public class Player implements GameEventDispatcher {
 	// used to communicate with other objects
 	// -----------------------------------------------------------------------------------------------
 	private StateManager stateManager;
+	private ArrayList<GameEventListener> listeners = new ArrayList<>();
 
 	// describe player state
 	// -----------------------------------------------------------------------------------------------
+	private int lagFrames = 0;
+	private boolean hasLagReduced = false;
+	
 	private State state;
 	private double xPos = 350;
 	private double yPos = 190;
@@ -66,6 +85,8 @@ public class Player implements GameEventDispatcher {
 	}
 
 	public void tick() {
+		setHasLagReduced(false);
+		
 		fall();
 		move();
 		setState(stateManager.getNextState(getState()));
@@ -215,7 +236,13 @@ public class Player implements GameEventDispatcher {
 
 	private void fall() {
 		if (this.falling == true) {
+			double oldSpeed = getySpeed();
+			
 			this.ySpeed += PlatformingConstants.getGravity();
+			
+			if (oldSpeed < 0 && getySpeed() >= 0) {
+				dispatchEvent(new JumpPeakedEvent());
+			}
 		}
 	}
 
@@ -306,6 +333,22 @@ public class Player implements GameEventDispatcher {
 
 	// getters / setters
 	// -----------------------------------------------------------------------------------------------
+	public int getLagFrames() {
+		return lagFrames;
+	}
+
+	public void setLagFrames(int lagFrames) {
+		this.lagFrames = lagFrames;
+	}
+	
+	public boolean isHasLagReduced() {
+		return hasLagReduced;
+	}
+
+	public void setHasLagReduced(boolean hadLagReduced) {
+		this.hasLagReduced = hadLagReduced;
+	}
+
 	public State getState() {
 		return state;
 	}
@@ -584,5 +627,15 @@ public class Player implements GameEventDispatcher {
 
 	public void setCollidedPlatform(Platform collidedPlatform) {
 		this.collidedPlatform = collidedPlatform;
+	}
+
+	@Override
+	public ArrayList<GameEventListener> getListeners() {
+		return listeners;
+	}
+
+	@Override
+	public Player getTargetPlayer() {
+		return this;
 	}
 }

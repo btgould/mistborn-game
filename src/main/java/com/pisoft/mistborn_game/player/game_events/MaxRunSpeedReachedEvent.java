@@ -17,4 +17,13 @@ public class MaxRunSpeedReachedEvent extends GameEvent {
 		targetPlayer.setxAcc(0);
 		targetPlayer.setxSpeed(PlatformingConstants.getMaxRunSpeed() * directionMultiplyer);
 	}
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		MaxRunSpeedReachedEvent clone = (MaxRunSpeedReachedEvent) super.clone();
+		
+		clone.direction = this.direction;
+		
+		return clone;
+	}
 }

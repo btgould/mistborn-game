@@ -8,6 +8,8 @@ public class WalkAction extends PlayerAction {
 	private Side direction;
 	
 	public WalkAction(Side direction) {
+		super();
+		
 		this.direction = direction;
 	}
 	
@@ -27,5 +29,14 @@ public class WalkAction extends PlayerAction {
 		double accMultiplier = (targetPlayer.getFacingSide() == Side.RIGHT) ? 1 : -1;
 		double xAcc = PlatformingConstants.getWalkAcc();
 		targetPlayer.setxAcc(xAcc * accMultiplier);
+	}
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		WalkAction clone = (WalkAction) super.clone();
+		
+		clone.direction = this.direction;
+		
+		return clone;
 	}
 }

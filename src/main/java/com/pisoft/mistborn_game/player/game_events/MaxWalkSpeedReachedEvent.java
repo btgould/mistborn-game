@@ -23,4 +23,13 @@ public class MaxWalkSpeedReachedEvent extends GameEvent {
 			targetPlayer.setxSpeed(PlatformingConstants.getMaxWalkSpeed() * directionMultiplyer);
 		}
 	}
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		MaxWalkSpeedReachedEvent clone = (MaxWalkSpeedReachedEvent) super.clone();
+		
+		clone.direction = this.direction;
+		
+		return clone;
+	}
 }

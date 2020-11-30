@@ -2,6 +2,10 @@ package com.pisoft.mistborn_game.player.actions;
 
 public class StopSteelPushAction extends PlayerAction {
 	
+	public StopSteelPushAction() {
+		super();
+	}
+	
 	@Override
 	public void resolve() {
 		targetPlayer.setSteelPushing(false);
@@ -11,4 +15,14 @@ public class StopSteelPushAction extends PlayerAction {
 			targetPlayer.setSliding(true);
 		}
 	}
+	
+	@Override
+	public boolean isCompatible(PlayerAction action) {
+		if (action instanceof SteelPushAction) {
+			return false;
+		}
+		
+		return true;
+	}
+
 }

@@ -1,20 +1,24 @@
 package com.pisoft.mistborn_game.player.intents;
 
 import com.pisoft.mistborn_game.player.actions.JumpReleaseAction;
-import com.pisoft.mistborn_game.player.actions.PlayerAction;
-import com.pisoft.mistborn_game.player.actions.ShortJumpAction;
-import com.pisoft.mistborn_game.player.state.State;
+import com.pisoft.mistborn_game.player.actions.ShortenJumpAction;
+import com.pisoft.mistborn_game.player.constants.PlatformingConstants;
 
 public class StopJumpIntent extends PlayerIntent {
 	
+	public StopJumpIntent() {
+		super();
+		
+	}
+
 	@Override
-	public PlayerAction parseIntent() {
-		if (targetPlayer.getState() == State.JUMPING) {
+	public void resolve() {
+		if (targetPlayer.getySpeed() <= PlatformingConstants.getShortJumpSpeed() && targetPlayer.isJumping()) {
 			// jumping --> shorten jump
-			return new ShortJumpAction();
+			dispatchEvent(new ShortenJumpAction());
 		} else {
 			// not jumping --> jump relased
-			return new JumpReleaseAction();
+			dispatchEvent(new JumpReleaseAction());
 		}
 	}
 }

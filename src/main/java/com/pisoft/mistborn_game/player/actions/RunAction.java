@@ -8,6 +8,8 @@ public class RunAction extends PlayerAction {
 	private Side direction;
 	
 	public RunAction(Side direction) {
+		super();
+		
 		this.direction = direction;
 	}
 	
@@ -29,5 +31,14 @@ public class RunAction extends PlayerAction {
 		double xAcc = PlatformingConstants.getRunAcc();
 
 		targetPlayer.setxAcc(xAcc * accMultiplier);
+	}
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		RunAction clone = (RunAction) super.clone();
+		
+		clone.direction = this.direction;
+		
+		return clone;
 	}
 }

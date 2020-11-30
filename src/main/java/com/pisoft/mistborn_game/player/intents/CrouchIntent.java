@@ -1,17 +1,18 @@
 package com.pisoft.mistborn_game.player.intents;
 
 import com.pisoft.mistborn_game.player.actions.CrouchAction;
-import com.pisoft.mistborn_game.player.actions.PlayerAction;
 
 public class CrouchIntent extends PlayerIntent {
 	
+	public CrouchIntent() {
+		super();
+	}
+	
 	@Override
-	public PlayerAction parseIntent() {
+	public void resolve() {
 		if (targetPlayer.isGrounded()) {
 			// grounded --> crouch
-			return new CrouchAction();
-		}
-		
-		return null;
+			dispatchEvent(new CrouchAction());
+		}		
 	}
 }

@@ -20,7 +20,7 @@ public class LoadedLevels {
         // new Platform(xPos, yPos, width, height);
         // new Platform(0, 300, 500, 50);
         platforms.add(new Platform(250, 100, 50, 500));
-        platforms.add(new Platform(450, 350, 50, 500));
+        // platforms.add(new Platform(450, 100, 50, 500));
         // new Platform(0, 100, 500, 50);
         platforms.add(new Platform(0, 500, 1500, 50));
     }

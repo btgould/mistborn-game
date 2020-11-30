@@ -8,6 +8,8 @@ public class AirAccAction extends PlayerAction {
 	private Side direction;
 	
 	public AirAccAction(Side direction) {
+		super();
+		
 		this.direction = direction;
 	}
 	
@@ -23,9 +25,16 @@ public class AirAccAction extends PlayerAction {
 
 		// player must be facing either LEFT or RIGHT
 		double accMultiplier = (targetPlayer.getFacingSide() == Side.RIGHT) ? 1 : -1;
-
 		double xAcc = PlatformingConstants.getAirAcc();
-
 		targetPlayer.setxAcc(xAcc * accMultiplier);
+	}
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		AirAccAction clone = (AirAccAction) super.clone();
+		
+		clone.direction = this.direction;
+		
+		return clone;
 	}
 }

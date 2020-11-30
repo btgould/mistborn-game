@@ -15,7 +15,7 @@ public class Painter {
 
     public void paintLevel(Graphics g, Level level) {
         //paint player
-        paintPlayer(g, level.getPlayerController().getPlayer());
+        paintPlayer(g, level.getPlayer());
         
         //paint platforms
         for (int i = 0; i < level.getPlatforms().size(); i++) {
@@ -26,6 +26,10 @@ public class Painter {
         for (int i = 0; i < level.getMetals().size(); i++) {
             paintMetal(g, level.getMetals().get(i));
         }
+        
+        printDebug(g, level.getPlayer());
+        
+        g.dispose();
     }
 
     private void paintPlayer(Graphics g, Player player) {
@@ -154,5 +158,132 @@ public class Painter {
 
         g2d.draw(at.createTransformedShape(rect));
     }
+    
+    // debug stuff
+    // ---------------------------------------------------------------------------------------------------
+    private void printDebug(Graphics g, Player player) {
+    	g.setColor(Color.black);
+
+		DebugPrinter dp = new DebugPrinter(g, 10, 10);
+
+		dp.printMessage("Player State: " + player.getState());
+		dp.printMessage("xPos: " + player.getxPos());
+		dp.printMessage("yPos: " + player.getyPos());
+		dp.printMessage("xSpeed: " + player.getxSpeed());
+		dp.printMessage("ySpeed: " + player.getySpeed());
+		dp.printMessage("xAcc: " + player.getxAcc());
+		dp.printMessage("yAcc: " + player.getyAcc());
+		dp.printMessage("xPushAmount: " + player.getxPushAmount());
+		dp.printMessage("yPushAmount: " + player.getyPushAmount());
+
+		dp.nextColumn(250);
+
+		dp.printMessage("Facing Side: " + player.getFacingSide());
+		dp.printMessage("Wants to Acc: " + player.wantsToAccelerate());
+		dp.printMessage("Accelerating: " + player.isAccelerating());
+		dp.printMessage("Walking: " + player.isWalking());
+		dp.printMessage("Running: " + player.isRunning());
+		dp.printMessage("Can Run: " + player.getCanRun());
+		dp.printMessage("Sliding: " + player.isSliding());
+		dp.printMessage("Crouching: " + player.isCrouching());
+
+		dp.nextColumn(150);
+
+		dp.printMessage("Grounded: " + player.isGrounded());
+		dp.printMessage("Falling: " + player.isFalling());
+		dp.printMessage("Landing: " + player.isLanding());
+		dp.blankLine(5);
+		dp.printMessage("Can Jump: " + player.canJump());
+		dp.printMessage("Jumping: " + player.isJumping());
+		dp.blankLine(5);
+		dp.printMessage("Can Double Jump: " + player.canDoubleJump());
+		dp.printMessage("Double Jumping: " + player.isDoubleJumping());
+		dp.blankLine(5);
+		dp.printMessage("Last Wall Jump Side: " + player.getLastWallJumpSide());
+		dp.printMessage("Wall Jumping: " + player.isWallJumping());
+		dp.blankLine(5);
+		dp.printMessage("Jump Released: " + player.isJumpReleased());
+
+		dp.nextColumn(150);
+
+		dp.printMessage("At Wall: " + player.isAtWall());
+		dp.printMessage("Wall Side: " + player.getWallSide());
+		dp.printMessage("Wall pushing: " + player.isWallPushing());
+
+		dp.nextColumn(150);
+
+		dp.printMessage("Steel Pushing: " + player.isSteelPushing());
+		try {
+			dp.printMessage(
+					"Target Metal: " + player.getTargetMetal().getxPos() + ", " + player.getTargetMetal().getyPos());
+		} catch (NullPointerException e) {
+			dp.printMessage("Target Metal: null");
+		}
+    }
+    
+    /**
+	 * A class to simplify the real time printing of debug messages to the screen.
+	 * <p>
+	 * Contains methods to easily format message placement on the screen.
+	 * 
+	 * @author gouldb
+	 */
+	private class DebugPrinter {
+
+		private Graphics g;
+
+		private int x, y, xOffset, yOffset;
+
+		/**
+		 * Simple constructor for the <code>DebugPrinter</code> class
+		 * 
+		 * 
+		 * @param g The <code>Graphics</code> object to be used to draw the messages
+		 * @param x Starting x coordinate for message location
+		 * @param y Starting y coordinate for message location
+		 */
+		private DebugPrinter(Graphics g, int x, int y) {
+			this.g = g;
+			this.x = x;
+			this.y = y;
+
+			xOffset = 0;
+			yOffset = 0;
+		}
+
+		/**
+		 * Prints a message to the screen at the current message location, and
+		 * increments the y coordinate of the message location to prevent messages from
+		 * being printed on top of each other.
+		 * 
+		 * @param message The message to print onto the screen
+		 */
+		private void printMessage(String message) {
+			g.drawString(message, x + xOffset, y + yOffset);
+
+			yOffset += 20;
+		}
+
+		/**
+		 * Moves message location to the top of a new column, allowing for easy grouping
+		 * of debug messages by column.
+		 * 
+		 * @param offset The x coordinate distance between the old and new columns
+		 */
+		private void nextColumn(int offset) {
+			xOffset += offset;
+			yOffset = 0;
+		}
+
+		/**
+		 * Prints a blank line, allowing for easy subdivision of messages in the same
+		 * column.
+		 * 
+		 * @param offset The y coordinate size of the blank line
+		 */
+		private void blankLine(int offset) {
+			yOffset += offset;
+		}
+	}
 
 }

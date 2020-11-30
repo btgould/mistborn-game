@@ -2,8 +2,15 @@ package com.pisoft.mistborn_game.player.actions;
 
 import com.pisoft.mistborn_game.player.Side;
 import com.pisoft.mistborn_game.player.constants.PlatformingConstants;
+import com.pisoft.mistborn_game.player.intents.AccelerateIntent;
 
+// TODO: should we do this with getWallSide(), or have a member for direction? 
 public class WallJumpAction extends PlayerAction {
+	
+	public WallJumpAction() {
+		super();
+	}
+	
 	@Override
 	public void resolve() {
 		targetPlayer.setSliding(false);
@@ -27,11 +34,8 @@ public class WallJumpAction extends PlayerAction {
 		Side facingSide = (targetPlayer.getLastWallJumpSide() == Side.LEFT) ? Side.RIGHT : Side.LEFT;
 		targetPlayer.setFacingSide(facingSide);
 		
-		// TODO: add lag frames  / buffer for this
 		if (targetPlayer.wantsToAccelerate()) {
-			PlayerAction sideEffect = new AirAccAction(targetPlayer.getLastWallJumpSide());
-			sideEffect.setTargetPlayer(targetPlayer);
-			sideEffect.resolve();
+			dispatchEvent(new AccelerateIntent(targetPlayer.getLastWallJumpSide()));
 		}
 	}
 }

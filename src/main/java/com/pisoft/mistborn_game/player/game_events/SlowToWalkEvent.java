@@ -21,5 +21,13 @@ public class SlowToWalkEvent extends GameEvent {
 
 		targetPlayer.setxSpeed(targetPlayer.getxSpeed() - (slowDownAmount * directionMultiplyer));
 	}
-
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		SlowToWalkEvent clone = (SlowToWalkEvent) super.clone();
+		
+		clone.direction = this.direction;
+		
+		return clone;
+	}
 }

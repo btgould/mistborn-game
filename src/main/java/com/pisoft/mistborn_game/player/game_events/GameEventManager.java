@@ -1,73 +1,38 @@
 package com.pisoft.mistborn_game.player.game_events;
 
-import java.util.ArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
 
-import com.pisoft.mistborn_game.player.Player;
-import com.pisoft.mistborn_game.player.actions.PlayerAction;
-import com.pisoft.mistborn_game.player.actions.PlayerActionListener;
+import com.pisoft.mistborn_game.Game;
 
-public class GameEventManager implements GameEventListener, PlayerActionListener {
-	private Player targetPlayer;
+public class GameEventManager implements GameEventListener {
 
-	private ArrayList<GameEvent> queuedEvents = new ArrayList<>();
-	private ArrayList<PlayerAction> queuedActions = new ArrayList<>();
-
-	private boolean resolving = false;
+	private ArrayBlockingQueue<GameEvent> queuedEvents = new ArrayBlockingQueue<GameEvent>(50);
 
 	// event resolution methods
 	// ---------------------------------------------------------------------------------------------------
 	public void resolveQueuedEvents() {
-		resolving = true;
 
-		for (GameEvent event : queuedEvents) {
-			event.setTargetPlayer(targetPlayer);
-			event.resolve();
-		}
-
-		queuedEvents.clear();
-
-		resolving = false;
-	}
-
-	@Override
-	public void receiveGameEvent(GameEvent event) {
-		if (event != null && !resolving) {
-			queuedEvents.add(event);
-		}
-	}
-
-	// action resolution methods
-	// ---------------------------------------------------------------------------------------------------
-	public void resolveQueuedActions() {
-		resolving = true;
-
-		for (PlayerAction action : queuedActions) {
-			action.setTargetPlayer(targetPlayer);
-			action.resolve();
-		}
-
-		queuedActions.clear();
-
-		resolving = false;
-	}
-
-	// TODO: filter by priority, exclusivity, etc.
-	@Override
-	public void receiveAction(PlayerAction action) {
-		if (action != null) {
-			if (!resolving) {
-				queuedActions.add(action);
+		int skippedEvents = 0;
+		
+		while (queuedEvents.size() > skippedEvents) {
+			GameEvent event = queuedEvents.remove();
+			
+			if (Game.getCurrentTime() >= event.getValidExecutionTime()) {
+				System.out.println("Resolving event: " + event.getClass().getSimpleName());
+				
+				event.resolve();
+			} else {
+				// this works because the queue is FIFO
+				queuedEvents.add(event);
+				skippedEvents++;
 			}
 		}
 	}
 
-	// getters and setters
-	// ---------------------------------------------------------------------------------------------------
-	public Player getTargetPlayer() {
-		return targetPlayer;
-	}
-
-	public void setTargetPlayer(Player targetPlayer) {
-		this.targetPlayer = targetPlayer;
+	@Override
+	public void receiveGameEvent(GameEvent event) {
+		if (event != null) {
+			queuedEvents.add(event);
+		}
 	}
 }

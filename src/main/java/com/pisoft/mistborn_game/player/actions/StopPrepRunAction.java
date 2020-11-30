@@ -4,6 +4,10 @@ import com.pisoft.mistborn_game.player.constants.PlatformingConstants;
 
 public class StopPrepRunAction extends PlayerAction {
 	
+	public StopPrepRunAction() {
+		super();
+	}
+	
 	@Override
 	public void resolve() {
 		targetPlayer.setCanRun(false);
@@ -14,5 +18,14 @@ public class StopPrepRunAction extends PlayerAction {
 		PlatformingConstants.setMaxAirSpeed(PlatformingConstants.getMaxWalkSpeed());
 
 		targetPlayer.setxAcc(0);
+	}
+	
+	@Override
+	public boolean isCompatible(PlayerAction action) {
+		if (action instanceof PrepRunAction) {
+			return false;
+		}
+		
+		return true;
 	}
 }

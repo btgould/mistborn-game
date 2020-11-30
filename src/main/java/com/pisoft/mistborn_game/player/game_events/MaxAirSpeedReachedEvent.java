@@ -17,5 +17,13 @@ public class MaxAirSpeedReachedEvent extends GameEvent {
 		targetPlayer.setxAcc(0);
 		targetPlayer.setxSpeed(PlatformingConstants.getMaxAirSpeed() * directionMultiplyer);
 	}
-
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		MaxAirSpeedReachedEvent clone = (MaxAirSpeedReachedEvent) super.clone();
+		
+		clone.direction = this.direction;
+		
+		return clone;
+	}
 }

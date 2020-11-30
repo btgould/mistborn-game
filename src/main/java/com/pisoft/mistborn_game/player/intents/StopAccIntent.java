@@ -1,32 +1,40 @@
 package com.pisoft.mistborn_game.player.intents;
 
 import com.pisoft.mistborn_game.player.Side;
-import com.pisoft.mistborn_game.player.actions.PlayerAction;
 import com.pisoft.mistborn_game.player.actions.StopAccAction;
 import com.pisoft.mistborn_game.player.actions.StopWallPushAction;
 
 public class StopAccIntent extends PlayerIntent {
-	
+
 	private Side direction;
 
 	public StopAccIntent(Side direction) {
+		super();
+		
 		this.direction = direction;
 	}
 
 	@Override
-	public PlayerAction parseIntent() {
+	public void resolve() {
 		// only accept stop accelerate intent if it is in the same direction as the
 		// player is accelerating
-		if (direction == targetPlayer.getFacingSide()) {
+		if ((targetPlayer.isAccelerating() && direction == targetPlayer.getFacingSide()) || !targetPlayer.isAccelerating()) {
 			if (targetPlayer.isWallPushing()) {
 				// at wall --> stop wall pushing
-				return new StopWallPushAction();
+				dispatchEvent(new StopWallPushAction());
 			} else {
 				// not at wall --> stop accelerating
-				return new StopAccAction();
+				dispatchEvent(new StopAccAction());
 			}
 		}
+	}
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		StopAccIntent clone = (StopAccIntent) super.clone();
 		
-		return null;
+		clone.direction = this.direction;
+		
+		return clone;
 	}
 }

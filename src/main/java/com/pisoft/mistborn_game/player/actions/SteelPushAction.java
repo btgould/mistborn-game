@@ -10,6 +10,8 @@ public class SteelPushAction extends PlayerAction {
 	private Point location;
 	
 	public SteelPushAction(Point location) {
+		super();
+		
 		this.location = location;
 	}
 	
@@ -25,5 +27,14 @@ public class SteelPushAction extends PlayerAction {
                 targetPlayer.setSteelPushing(false);
             }
         }
+	}
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		SteelPushAction clone = (SteelPushAction) super.clone();
+		
+		clone.location = this.location;
+		
+		return clone;
 	}
 }
