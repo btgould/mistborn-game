@@ -36,7 +36,6 @@ public class Player implements GameEventDispatcher {
 	// describe player state
 	// -----------------------------------------------------------------------------------------------
 	private int lagFrames = 0;
-	private boolean hasLagReduced = false;
 	
 	private State state;
 	private double xPos = 350;
@@ -85,7 +84,8 @@ public class Player implements GameEventDispatcher {
 	}
 
 	public void tick() {
-		setHasLagReduced(false);
+		if (lagFrames != 0) 
+			lagFrames--;
 		
 		fall();
 		move();
@@ -341,14 +341,6 @@ public class Player implements GameEventDispatcher {
 		this.lagFrames = lagFrames;
 	}
 	
-	public boolean isHasLagReduced() {
-		return hasLagReduced;
-	}
-
-	public void setHasLagReduced(boolean hadLagReduced) {
-		this.hasLagReduced = hadLagReduced;
-	}
-
 	public State getState() {
 		return state;
 	}

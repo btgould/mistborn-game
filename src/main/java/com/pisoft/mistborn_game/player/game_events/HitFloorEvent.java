@@ -5,7 +5,6 @@ import com.pisoft.mistborn_game.player.Side;
 import com.pisoft.mistborn_game.player.constants.PlatformingConstants;
 import com.pisoft.mistborn_game.player.intents.AccelerateIntent;
 
-// TODO: walk / run action side effect
 public class HitFloorEvent extends GameEvent {
 	@Override 
 	public void resolve() {
