@@ -14,20 +14,22 @@ public abstract class GameEvent implements GameEventDispatcher, Cloneable {
 
 	private long creationTime;
 	private long validExecutionTime;
+	
+	private boolean isSideEffect;
 
 	public GameEvent() {
 		long time = Game.getCurrentTime();
 
 		setCreationTime(time);
 		setValidExecutionTime(time);
+		setSideEffect(false);
 	}
 
 	public abstract void resolve();
 
 	@Override
 	public void dispatchEvent(GameEvent e) {
-
-		e.setCreationTime(Long.MIN_VALUE);
+		e.setSideEffect(true);
 
 		GameEventDispatcher.super.dispatchEvent(e);
 	}
@@ -82,5 +84,13 @@ public abstract class GameEvent implements GameEventDispatcher, Cloneable {
 
 	public void setValidExecutionTime(long validExecutionTime) {
 		this.validExecutionTime = validExecutionTime;
+	}
+
+	public boolean isSideEffect() {
+		return isSideEffect;
+	}
+
+	public void setSideEffect(boolean isSideEffect) {
+		this.isSideEffect = isSideEffect;
 	};
 }

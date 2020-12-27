@@ -18,14 +18,4 @@ public class StopAccAction extends PlayerAction {
 
 		targetPlayer.setxAcc(0);
 	}
-
-	// TODO: double check this one
-	@Override
-	public boolean isCompatible(PlayerAction action) {
-		if (action instanceof WalkAction || action instanceof RunAction || action instanceof AirAccAction) {
-			return false;
-		}
-
-		return true;
-	}
 }

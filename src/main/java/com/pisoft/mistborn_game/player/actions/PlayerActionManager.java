@@ -1,67 +1,51 @@
 package com.pisoft.mistborn_game.player.actions;
 
-import com.pisoft.mistborn_game.player.game_events.GameEvent;
+import com.pisoft.mistborn_game.player.game_events.ConditionalGameEventQueue;
 import com.pisoft.mistborn_game.player.game_events.GameEventListener;
+import com.pisoft.mistborn_game.player.game_events.GameEventManager;
 
-public class PlayerActionManager implements GameEventListener {
+/**
+ * Class to manage the resolution of a queue of <code>PlayerAction</code>s. It
+ * contains a main queue, along with a set of buffers, each of which can have
+ * its own condition on which to add events.
+ * <p>
+ * By default, there are two buffers used. One ensures that the action's valid
+ * execution time has already passed using the <code>Game</code>'s current time,
+ * and the other prevents any actions with target players that are lagging from
+ * being executed.
+ * <p>
+ * During event resolution, each action is checked against the condition of
+ * every active buffer. If it meets any of those conditions, it is not resolved,
+ * but instead moved into the buffer until it no longer meets that condition. If
+ * no buffer's condition is met, the action is resolved and removed from the
+ * main queue.
+ * 
+ * @author gouldb
+ */
+public class PlayerActionManager extends GameEventManager<PlayerAction> implements GameEventListener {
 
-	private PlayerActionQueue queuedActions = new PlayerActionQueue();
+	/**
+	 * Constructs a new <code>PlayerActionManager</code> with the default set of
+	 * buffers: one for actions that have not reached their valid execution time
+	 * yet, and one for actions with a target player that is lagging.
+	 */
+	public PlayerActionManager() {
+		super(PlayerAction.class);
+		
+		queuedEvents.setComp((a1, a2) -> a1.compareTo(a2));
+		
+		buffers.add(new ConditionalGameEventQueue<PlayerAction>(
+				a -> a.getTargetPlayer().getLagFrames() != 0 && !(a instanceof TransientAction)));
+	}
 
 	// action resolution methods
 	// ---------------------------------------------------------------------------------------------------
-	/**
-	 * Determines and performs the appropriate way to handle each action in the
-	 * queue.
-	 * <p>
-	 * Any action that does not have a target player that is lagging will be
-	 * resolved. If the target player is lagging, further checks are needed. If the
-	 * action is marked with the <code>TransientAction</code> interface, it is
-	 * resolved anyways. If it is not, it is moved into the queues lag buffer.
-	 */
-	public void resolveQueuedActions() {
-
-		queuedActions.updateLagBuffer();
-
-		while (queuedActions.size() > 0) {
-			PlayerAction action = queuedActions.deque();
-
-			if (action.getTargetPlayer().getLagFrames() == 0) {
-				// target player is not lagging --> resolve action
-				System.out.println("Resolving action: " + action.getClass().getSimpleName());
-				action.resolve();
-				action.getTargetPlayer().setLagFrames(action.getLagFrames());
-			} else {
-				if (action instanceof TransientAction) {
-					// target player is lagging BUT action is transient --> resolve action
-					System.out.println("Transiently resolving action: " + action.getClass().getSimpleName());
-					action.resolve();
-					action.getTargetPlayer()
-							.setLagFrames(Math.max(action.getLagFrames(), action.getTargetPlayer().getLagFrames()));
-				} else {
-					// target player is lagging and action is not transient --> move to lag buffer
-					queuedActions.addToLagBuffer(action);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Receives an event and attempts to add it to the
-	 * <code>PlayerActionQueue</code>. If the event is anything other than a
-	 * <code>PlayerAction</code> object, an <code>IllegalStateException</code> will
-	 * be thrown.
-	 * 
-	 * @throws IllegalStateException If attempting to receive anything other than a
-	 *                               <code>PlayerAction</code> object.
-	 */
 	@Override
-	public void receiveGameEvent(GameEvent event) {
-		if (event instanceof PlayerAction) {
-			PlayerAction action = (PlayerAction) event;
-			queuedActions.add(action);
-		} else {
-			throw (new IllegalStateException(
-					"PlayerActionManager attempted to receive something other than a PlayerAction"));
-		}
+	protected void resolve(PlayerAction event) {
+		System.out.println("Resolving action: " + event.getClass().getSimpleName());
+		event.resolve();
+		// TODO: this should be part of actions resolve method
+		event.getTargetPlayer()
+				.setLagFrames(Math.max(event.getLagFrames(), event.getTargetPlayer().getLagFrames()));
 	}
 }

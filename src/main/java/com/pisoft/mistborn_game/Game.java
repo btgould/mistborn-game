@@ -6,6 +6,7 @@ import com.pisoft.mistborn_game.levels.LoadedLevels;
 import com.pisoft.mistborn_game.player.actions.PlayerActionManager;
 import com.pisoft.mistborn_game.player.constants.PlayerActionLagConstants;
 import com.pisoft.mistborn_game.player.constants.PlayerActionPriorityConstants;
+import com.pisoft.mistborn_game.player.game_events.GameEvent;
 import com.pisoft.mistborn_game.player.game_events.GameEventManager;
 
 /**
@@ -27,7 +28,7 @@ public class Game implements Runnable {
 
 	private static Level activeLevel;
 
-	private static GameEventManager gameEventManager = new GameEventManager();
+	private static GameEventManager<GameEvent> gameEventManager = new GameEventManager<>(GameEvent.class);
 	private static PlayerActionManager playerActionManager = new PlayerActionManager();
 
 	// for debugging: increase delay between ticks to read stat menu
@@ -130,7 +131,7 @@ public class Game implements Runnable {
 	private void tick() {
 		System.out.println("Frame break");
 
-		playerActionManager.resolveQueuedActions();
+		playerActionManager.resolveQueuedEvents();
 		activeLevel.getPlayer().tick();
 		gameEventManager.resolveQueuedEvents();
 
@@ -211,11 +212,11 @@ public class Game implements Runnable {
 		Game.display = display;
 	}
 
-	public static GameEventManager getGameEventManager() {
+	public static GameEventManager<GameEvent> getGameEventManager() {
 		return gameEventManager;
 	}
 
-	public static void setGameEventManager(GameEventManager gameEventManager) {
+	public static void setGameEventManager(GameEventManager<GameEvent> gameEventManager) {
 		Game.gameEventManager = gameEventManager;
 	}
 

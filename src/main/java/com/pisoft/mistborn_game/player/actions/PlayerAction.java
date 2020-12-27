@@ -19,7 +19,7 @@ public abstract class PlayerAction extends GameEvent implements Comparable<Playe
 
 	public PlayerAction() {
 		super();
-		
+
 		setPriority(PlayerActionPriorityConstants.getActionPriorities().getOrDefault(this.getClass(), 0));
 		setLagFrames(PlayerActionLagConstants.getLagFrames().getOrDefault(this.getClass(), 0));
 	}
@@ -35,7 +35,8 @@ public abstract class PlayerAction extends GameEvent implements Comparable<Playe
 	 * together, by checking against the existing queue before adding a new action.
 	 * 
 	 * @param action The action to be checked against.
-	 * @return <code>true</code> if the actions are compatible, <code>false</code> otherwise.
+	 * @return <code>true</code> if the actions are compatible, <code>false</code>
+	 *         otherwise.
 	 * 
 	 */
 	public boolean isCompatible(PlayerAction action) {
@@ -43,26 +44,32 @@ public abstract class PlayerAction extends GameEvent implements Comparable<Playe
 	}
 
 	/**
-	 * Natural ordering for this class is newest first.
+	 * Natural ordering for this class is newest first, unless either action is a
+	 * "side effect". All side effect actions should be resolved immediately after
+	 * the original action that created them, and are therefore "newer" than any
+	 * non-side effect action.
 	 * <p>
-	 * Newer actions are catagorized as "less than" older actions. 
-	 * 
+	 * Newer actions are catagorized as "less than" older actions.
 	 */
 	@Override
-	public int compareTo(PlayerAction other) {	
-		if (this.getCreationTime() == other.getCreationTime()) {
-			return 0;
+	public int compareTo(PlayerAction other) {
+		if (this.isSideEffect() && other.isSideEffect()) {
+			return Long.compare(this.getCreationTime(), other.getCreationTime());
+		} else if (this.isSideEffect()) {
+			return -1;
+		} else if (other.isSideEffect()) {
+			return 1;
+		} else {
+			return Long.compare(this.getCreationTime(), other.getCreationTime());
 		}
-		
-		return (this.getCreationTime() < other.getCreationTime()) ? -1 : 1;
 	}
-	
+
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		PlayerAction clone = (PlayerAction) super.clone();
-		
+
 		clone.setPriority(this.getPriority());
-		
+
 		return clone;
 	}
 

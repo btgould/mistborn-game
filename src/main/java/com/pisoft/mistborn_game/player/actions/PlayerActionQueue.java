@@ -1,51 +1,89 @@
 package com.pisoft.mistborn_game.player.actions;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+
+import com.pisoft.mistborn_game.player.game_events.GameEventQueue;
 
 /**
- * Thread-safe class to manage a queue of <code>PlayerAction</code> objects. It
- * has a main queue list, and a secondary lagBuffer list. While in the queue,
- * actions will always remain sorted in order of ascending creationTime.
+ * Thread-safe class to manage a queue of <code>PlayerAction</code> objects.
  * <p>
- * The lagBuffer should be used to temporarily store actions that have a target
- * player that is lagging in a distinct place. To get these actions back, simply
- * call the <code>updateLagBuffer()</code> method. If the actions are ready to
- * be moved back (i.e. their target player is no longer lagging), then the
- * actions will be moved into the main queue. Otherwise, nothing will happen.
+ * Each queue uses a <code>Comparator</code> in order to sort its elements, and
+ * the queue will remain sorted in whatever order is specified.
  * 
  * @author gouldb
  *
  */
-public class PlayerActionQueue {
-
-	private ArrayList<PlayerAction> queue = new ArrayList<>();
-	private ArrayList<PlayerAction> lagBuffer = new ArrayList<>();
+public class PlayerActionQueue extends GameEventQueue<PlayerAction> {
 
 	/**
-	 * Attempts to insert an action into the queue. The index where the action is
-	 * inserted depends on its <code>creationTime</code>; this method will ensure
-	 * that the queue remains sorted with the earliest <code>creationTime</code>
-	 * coming first.
+	 * Constructs a new <code>PlayerActionQueue</code> with the default
+	 * <code>Comparator</code>. Elements will be sorted in ascending order by their
+	 * creation times.
+	 */
+	public PlayerActionQueue() {
+		setComp((e1, e2) -> e1.compareTo(e2));
+	}
+
+	/**
+	 * Constructs a new <code>PlayerActionQueue</code> with the specified
+	 * <code>Comparator</code>. Elements will be sorted in ascending order by the
+	 * given <code>Comparator</code>.
+	 * 
+	 * @param comp The <code>Comparator</code> to use when sorting the list
+	 */
+	public PlayerActionQueue(Comparator<PlayerAction> comp) {
+		super(comp);
+	}
+
+	/**
+	 * Attempts to add an element to the queue.
+	 * <p>
+	 * Before adding, each element in the queue is checked to make sure that no
+	 * conflicting actions can be queued at the same time. If a conflicting action
+	 * is found, the priority of each action is then checked. If the old action has
+	 * a higher priority, the new one is not added. Otherwise, the old action is
+	 * removed from the queue before adding the new one.
+	 * <p>
+	 * If the element is successfully added, it is inserted at the necessary
+	 * position to ensure the queue remains sorted by whatever order this queue's
+	 * <code>Comparator</code> specifies.
 	 * 
 	 * @param action The action to insert
 	 * @return <code>true</code> if the action is actually added to the queue,
 	 *         <code>false</code> if it is not.
 	 */
+	@Override
 	public boolean add(PlayerAction action) {
 		boolean indexFound = false;
 		int index = 0;
+		ArrayList<PlayerAction> toRemove = new ArrayList<>();
 
 		synchronized (queue) {
 			for (int i = 0; i < queue.size(); i++) {
-				if (!indexFound && action.getCreationTime() < queue.get(i).getCreationTime()) {
+				PlayerAction queued = queue.get(i);
+
+				if (!indexFound && getComp().compare(action, queued) < 0) {
 					// mark index to insert action, stop searching
 					index = i;
 					indexFound = true;
 				}
 
-				// NOTE: add check for conflicting actions here, return false / remove from
-				// queue if one is found
+				// NOTE: it would be nice to only override part of this method
+				// check for incompatible actions before adding
+				if (!action.isCompatible(queued)) {
+					if (queued.getPriority() > action.getPriority()) {
+						// queued action has higher priority --> don't add new action
+						return false;
+					} else {
+						// new action has higher priority --> remove queued action
+						toRemove.add(queued);
+					}
+				}
 			}
+
+			// remove all less important conflicting actions
+			queue.removeAll(toRemove);
 
 			if (!indexFound) {
 				// no element in queue was produced later --> insert at last index
@@ -55,60 +93,6 @@ public class PlayerActionQueue {
 			// if it gets here, action needs to be added
 			queue.add(index, action);
 			return true;
-		}
-	}
-
-	/**
-	 * Removes and returns the first element in the queue. If the queue is empty, an
-	 * exception will be thrown.
-	 * 
-	 * @return The first element in the queue
-	 */
-	public PlayerAction deque() {
-		synchronized (queue) {
-			return queue.remove(0);
-		}
-	}
-
-	/**
-	 * Returns the size of the queue
-	 * 
-	 * @return the size of the queue
-	 */
-	public int size() {
-		return queue.size();
-	}
-
-	/**
-	 * Adds an action to a buffer meant to hold actions while their target player is
-	 * lagging.
-	 * 
-	 * @param action The action to add
-	 */
-	public void addToLagBuffer(PlayerAction action) {
-		synchronized (lagBuffer) {
-			// NOTE: should I check for conflicting actions here?
-			lagBuffer.add(action);
-		}
-	}
-
-	/**
-	 * Checks if the actions in the lag buffer have a target player that is no
-	 * longer lagging. If they do, they are moved into the standard action queue.
-	 */
-	public void updateLagBuffer() {
-		if (lagBuffer.size() > 0 && lagBuffer.get(0).getTargetPlayer().getLagFrames() == 0) {
-			// buffer is ready to be emptied --> empty to queue
-			synchronized (lagBuffer) {
-				synchronized (queue) {
-					for (PlayerAction action : lagBuffer) {
-						this.add(action);
-					}
-
-					// NOTE: this assumes that all actions in the queue have the same target player
-					lagBuffer.clear();
-				}
-			}
 		}
 	}
 }

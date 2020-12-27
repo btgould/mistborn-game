@@ -15,6 +15,7 @@ public class PrepRunAction extends PlayerAction {
 		targetPlayer.setCanRun(true);
 		PlatformingConstants.setMaxAirSpeed(PlatformingConstants.getMaxRunSpeed());
 
+		// TODO: does not dispatch after wall jump
 		if (targetPlayer.isAccelerating()
 				&& Math.abs(targetPlayer.getxSpeed()) >= PlatformingConstants.getMaxWalkSpeed()) {
 			Side direction = (targetPlayer.getxSpeed() > 0) ? Side.RIGHT : Side.LEFT;
