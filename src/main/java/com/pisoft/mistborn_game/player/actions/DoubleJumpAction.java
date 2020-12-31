@@ -10,13 +10,9 @@ public class DoubleJumpAction extends PlayerAction {
 	
 	@Override
 	public void resolve() {
-		targetPlayer.setSliding(false);
-		targetPlayer.setGrounded(false);
-		targetPlayer.setLanding(false);
 		targetPlayer.setJumping(false);
 		targetPlayer.setDoubleJumping(true);
 		targetPlayer.setWallJumping(false);
-		targetPlayer.setFalling(true);
 		targetPlayer.setCrouching(false);
 
 		targetPlayer.setCanDoubleJump(false);

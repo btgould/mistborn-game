@@ -4,8 +4,8 @@ import com.pisoft.mistborn_game.display.Display;
 import com.pisoft.mistborn_game.levels.Level;
 import com.pisoft.mistborn_game.levels.LoadedLevels;
 import com.pisoft.mistborn_game.player.actions.PlayerActionManager;
-import com.pisoft.mistborn_game.player.constants.PlayerActionLagConstants;
-import com.pisoft.mistborn_game.player.constants.PlayerActionPriorityConstants;
+import com.pisoft.mistborn_game.player.constants.GameEventLagConstants;
+import com.pisoft.mistborn_game.player.constants.GameEventPriorityConstants;
 import com.pisoft.mistborn_game.player.game_events.GameEvent;
 import com.pisoft.mistborn_game.player.game_events.GameEventManager;
 
@@ -59,8 +59,8 @@ public class Game implements Runnable {
 	private void initResources() {
 		LoadedLevels.initLevels();
 
-		PlayerActionPriorityConstants.initActionPriorities();
-		PlayerActionLagConstants.initLagFrames();
+		GameEventPriorityConstants.initActionPriorities();
+		GameEventLagConstants.initLagFrames();
 	}
 
 	/**
@@ -127,6 +127,7 @@ public class Game implements Runnable {
 	 * the last call of this method, and changes the state of the active
 	 * <code>Player</code> object accordingly.
 	 * 
+	 * TODO: This should be able to tick an arbitrary number / type of objects
 	 */
 	private void tick() {
 		System.out.println("Frame break");
@@ -135,7 +136,7 @@ public class Game implements Runnable {
 		activeLevel.getPlayer().tick();
 		gameEventManager.resolveQueuedEvents();
 
-		System.out.println("");
+		System.out.println();
 	}
 
 	/**

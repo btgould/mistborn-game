@@ -14,6 +14,7 @@ public class LeavingWallEvent extends GameEvent {
 	@Override
 	public void resolve() {
 		targetPlayer.setAtWall(false);
+		targetPlayer.setWallPushing(false);
 		targetPlayer.setWallSide(Side.NONE);
 
 		if (targetPlayer.wantsToAccelerate() && targetPlayer.getFacingSide() == direction) {

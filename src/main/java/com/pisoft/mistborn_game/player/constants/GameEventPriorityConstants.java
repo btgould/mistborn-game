@@ -20,7 +20,7 @@ import com.pisoft.mistborn_game.player.intents.StopJumpIntent;
  * @author gouldb
  *
  */
-public class PlayerActionPriorityConstants {
+public class GameEventPriorityConstants {
 	private static HashMap<Class<? extends PlayerAction>, Integer> actionPriorities = new HashMap<Class<? extends PlayerAction>, Integer>();
 
 	/**
@@ -75,6 +75,6 @@ public class PlayerActionPriorityConstants {
 	}
 
 	public static void setActionPriorities(HashMap<Class<? extends PlayerAction>, Integer> actionPriorities) {
-		PlayerActionPriorityConstants.actionPriorities = actionPriorities;
+		GameEventPriorityConstants.actionPriorities = actionPriorities;
 	}
 }

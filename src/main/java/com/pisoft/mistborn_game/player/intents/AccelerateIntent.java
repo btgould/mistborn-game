@@ -4,6 +4,7 @@ import com.pisoft.mistborn_game.player.Side;
 import com.pisoft.mistborn_game.player.actions.AirAccAction;
 import com.pisoft.mistborn_game.player.actions.CantAccAction;
 import com.pisoft.mistborn_game.player.actions.CrouchTurnAction;
+import com.pisoft.mistborn_game.player.actions.PlayerAction;
 import com.pisoft.mistborn_game.player.actions.RunAction;
 import com.pisoft.mistborn_game.player.actions.WalkAction;
 import com.pisoft.mistborn_game.player.actions.WallPushAction;
@@ -67,5 +68,10 @@ public class AccelerateIntent extends PlayerIntent {
 		clone.direction = this.direction;
 		
 		return clone;
+	}
+	
+	@Override
+	public Class<? extends PlayerAction> isEndedBy() {
+		return StopAccIntent.class;
 	}
 }

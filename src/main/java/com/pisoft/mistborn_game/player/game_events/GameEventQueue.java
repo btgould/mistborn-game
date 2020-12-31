@@ -40,14 +40,15 @@ public class GameEventQueue<T extends GameEvent> {
 	}
 
 	/**
-	 * Adds an element to the queue. The element is inserted at the necessary
-	 * position to ensure the queue remains sorted by whatever order this queue's
+	 * Adds an element to the queue.
+	 * <p>
+	 * Whenever an element is added, it is inserted at the necessary position to
+	 * ensure the queue remains sorted by whatever order this queue's
 	 * <code>Comparator</code> specifies.
 	 * 
-	 * @param event The event to add
-	 * @return <code>true</code> when the element is successfully added
+	 * @param event The event to insert
 	 */
-	public boolean add(T event) {
+	public void add(T event) {
 		boolean indexFound = false;
 		int index = 0;
 
@@ -58,18 +59,15 @@ public class GameEventQueue<T extends GameEvent> {
 					index = i;
 					indexFound = true;
 				}
-
-				// NOTE: does GameEventQueue need to check for conflicts? 
 			}
 
+			// no element in queue is "greater" than this one --> insert at last index
 			if (!indexFound) {
-				// no element in queue has later execution time --> insert at last index
 				index = queue.size();
 			}
 
 			// if it gets here, event needs to be added
 			queue.add(index, event);
-			return true;
 		}
 	}
 
@@ -83,12 +81,12 @@ public class GameEventQueue<T extends GameEvent> {
 			return queue.remove(0);
 		}
 	}
-	
+
 	/**
-	 * Returns as an <code>ArrayList</code> the set of all elements in
-	 * the queue that meet some condition.
+	 * Returns as an <code>ArrayList</code> the set of all elements in the queue
+	 * that meet some condition.
 	 * 
-	 * @param cond The condition to check elements by 
+	 * @param cond The condition to check elements by
 	 * @return The set of all elements that meet the condition
 	 */
 	public ArrayList<T> find(Predicate<T> cond) {
@@ -131,6 +129,19 @@ public class GameEventQueue<T extends GameEvent> {
 		synchronized (queue) {
 			for (T event : c) {
 				add(event);
+			}
+		}
+	}
+
+	/**
+	 * Removes all elements in the given collection from the queue.
+	 * 
+	 * @param c The collection of elements to remove
+	 */
+	public void removeAll(Collection<? extends T> c) {
+		synchronized (queue) {
+			for (T event : c) {
+				queue.remove(event);
 			}
 		}
 	}

@@ -2,6 +2,7 @@ package com.pisoft.mistborn_game.player.intents;
 
 import java.awt.Point;
 
+import com.pisoft.mistborn_game.player.actions.PlayerAction;
 import com.pisoft.mistborn_game.player.actions.SteelPushAction;
 
 public class SteelPushIntent extends PlayerIntent {
@@ -26,5 +27,10 @@ public class SteelPushIntent extends PlayerIntent {
 		clone.location = this.location;
 		
 		return clone;
+	}
+	
+	@Override
+	public Class<? extends PlayerAction> isEndedBy() {
+		return StopSteelPushIntent.class;
 	}
 }

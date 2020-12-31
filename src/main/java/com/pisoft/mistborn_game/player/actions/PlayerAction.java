@@ -1,7 +1,5 @@
 package com.pisoft.mistborn_game.player.actions;
 
-import com.pisoft.mistborn_game.player.constants.PlayerActionLagConstants;
-import com.pisoft.mistborn_game.player.constants.PlayerActionPriorityConstants;
 import com.pisoft.mistborn_game.player.game_events.GameEvent;
 
 /**
@@ -15,41 +13,13 @@ import com.pisoft.mistborn_game.player.game_events.GameEvent;
  */
 public abstract class PlayerAction extends GameEvent implements Comparable<PlayerAction> {
 
-	private int priority;
-
-	public PlayerAction() {
-		super();
-
-		setPriority(PlayerActionPriorityConstants.getActionPriorities().getOrDefault(this.getClass(), 0));
-		setLagFrames(PlayerActionLagConstants.getLagFrames().getOrDefault(this.getClass(), 0));
-	}
-
 	/**
-	 * Tests whether this action is compatible with another action. Despite intents
-	 * only dispatching actions if the player state is valid for that action, it is
-	 * possible for actions that should be mutually exclusive to be in the queue at
-	 * the same time (e.g. if multiple actions are queued while the player is
-	 * lagging).
-	 * <p>
-	 * This method can be used to ensure that no conflicting actions are ever queued
-	 * together, by checking against the existing queue before adding a new action.
-	 * 
-	 * @param action The action to be checked against.
-	 * @return <code>true</code> if the actions are compatible, <code>false</code>
-	 *         otherwise.
-	 * 
-	 */
-	public boolean isCompatible(PlayerAction action) {
-		return true;
-	}
-
-	/**
-	 * Natural ordering for this class is newest first, unless either action is a
+	 * Natural ordering for this class is oldest first, unless either action is a
 	 * "side effect". All side effect actions should be resolved immediately after
-	 * the original action that created them, and are therefore "newer" than any
+	 * the original action that created them, and are therefore "older" than any
 	 * non-side effect action.
 	 * <p>
-	 * Newer actions are catagorized as "less than" older actions.
+	 * Older actions are catagorized as "less than" older actions.
 	 */
 	@Override
 	public int compareTo(PlayerAction other) {
@@ -64,22 +34,20 @@ public abstract class PlayerAction extends GameEvent implements Comparable<Playe
 		}
 	}
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		PlayerAction clone = (PlayerAction) super.clone();
-
-		clone.setPriority(this.getPriority());
-
-		return clone;
-	}
-
-	// getters and setters
-	// ---------------------------------------------------------------------------------------------------
-	public int getPriority() {
-		return priority;
-	}
-
-	public void setPriority(int priority) {
-		this.priority = priority;
+	/**
+	 * Should be used to find the action (if any exists) that corresponds to
+	 * "stopping" this action. This allows start / stop pairs of actions to be
+	 * removed from queues entirely if a significant amount of time will pass before
+	 * the player is ready to resolve actions again.
+	 * <p>
+	 * The default implementation returns <code>null</code>, but any subclass that
+	 * wishes to communicate that it has a corresponding stop action should override
+	 * it.
+	 * 
+	 * @return <code>null</code>, or the class of the action that will "stop" this
+	 *         one, if it exists
+	 */
+	public Class<? extends PlayerAction> isEndedBy() {
+		return null;
 	}
 }

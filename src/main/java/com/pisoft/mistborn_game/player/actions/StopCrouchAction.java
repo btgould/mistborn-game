@@ -18,13 +18,4 @@ public class StopCrouchAction extends PlayerAction {
 
 		}
 	}
-
-	@Override
-	public boolean isCompatible(PlayerAction action) {
-		if (action instanceof CrouchAction) {
-			return false;
-		}
-
-		return true;
-	}
 }

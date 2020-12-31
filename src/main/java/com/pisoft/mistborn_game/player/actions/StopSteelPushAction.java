@@ -15,14 +15,4 @@ public class StopSteelPushAction extends PlayerAction {
 			targetPlayer.setSliding(true);
 		}
 	}
-	
-	@Override
-	public boolean isCompatible(PlayerAction action) {
-		if (action instanceof SteelPushAction) {
-			return false;
-		}
-		
-		return true;
-	}
-
 }

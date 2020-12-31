@@ -19,13 +19,4 @@ public class StopPrepRunAction extends PlayerAction {
 
 		targetPlayer.setxAcc(0);
 	}
-	
-	@Override
-	public boolean isCompatible(PlayerAction action) {
-		if (action instanceof PrepRunAction) {
-			return false;
-		}
-		
-		return true;
-	}
 }

@@ -1,5 +1,7 @@
 package com.pisoft.mistborn_game.player.actions;
 
+import java.util.ArrayList;
+
 import com.pisoft.mistborn_game.player.game_events.ConditionalGameEventQueue;
 import com.pisoft.mistborn_game.player.game_events.GameEventListener;
 import com.pisoft.mistborn_game.player.game_events.GameEventManager;
@@ -23,6 +25,8 @@ import com.pisoft.mistborn_game.player.game_events.GameEventManager;
  * @author gouldb
  */
 public class PlayerActionManager extends GameEventManager<PlayerAction> implements GameEventListener {
+	
+	private static final int BUFFER_LENGTH = 5;
 
 	/**
 	 * Constructs a new <code>PlayerActionManager</code> with the default set of
@@ -31,21 +35,47 @@ public class PlayerActionManager extends GameEventManager<PlayerAction> implemen
 	 */
 	public PlayerActionManager() {
 		super(PlayerAction.class);
-		
+
 		queuedEvents.setComp((a1, a2) -> a1.compareTo(a2));
-		
+
 		buffers.add(new ConditionalGameEventQueue<PlayerAction>(
 				a -> a.getTargetPlayer().getLagFrames() != 0 && !(a instanceof TransientAction)));
 	}
 
 	// action resolution methods
 	// ---------------------------------------------------------------------------------------------------
+	/**
+	 * Removes all conflicts in the same way as the standard
+	 * {@link GameEventManager} does, but then also checks for pairs of start / stop
+	 * actions that go together. If such a pair is found, and their target player is
+	 * lagging a significant amount (as determined by <code>BUFFER_LENGTH</code>), the "start" action is removed from the queue.
+	 */
+	@Override
+	protected void cleanUp() {
+		super.cleanUp();
+
+		ArrayList<PlayerAction> lagged = queuedEvents.filter(e -> e.getTargetPlayer().getLagFrames() >= BUFFER_LENGTH);
+		ArrayList<PlayerAction> toRemove = new ArrayList<>();
+
+		for (PlayerAction action : lagged) {
+			Class<? extends PlayerAction> endAction = action.isEndedBy();
+
+			for (PlayerAction end : lagged) {
+				if (end.getClass() == endAction) {
+					toRemove.add(action);
+				}
+			}
+		}
+
+		lagged.removeAll(toRemove);
+		queuedEvents.addAll(lagged);
+	}
+
 	@Override
 	protected void resolve(PlayerAction event) {
 		System.out.println("Resolving action: " + event.getClass().getSimpleName());
 		event.resolve();
 		// TODO: this should be part of actions resolve method
-		event.getTargetPlayer()
-				.setLagFrames(Math.max(event.getLagFrames(), event.getTargetPlayer().getLagFrames()));
+		event.getTargetPlayer().setLagFrames(Math.max(event.getLagFrames(), event.getTargetPlayer().getLagFrames()));
 	}
 }

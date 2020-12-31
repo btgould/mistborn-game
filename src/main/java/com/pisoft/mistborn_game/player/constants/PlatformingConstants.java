@@ -24,7 +24,7 @@ public class PlatformingConstants {
 	private static final double WALL_JUMP_Y_SPEED = -15; // initial ySpeed when the player wall jumps
 	private static final double WALL_JUMP_X_SPEED = 10; // initial xSpeed away from wall when the player wall jumps
 	private static final double SLOW_DOWN_AMOUNT = 1; // amount for player to slow when prep run released while running
-	private static final int LANDING_DELAY = 5; // number of frames that the landing process takes (TODO: this should
+	private static final int LANDING_DELAY = 5; // number of frames that the landing process takes (NOTE: this should
 												// probably be moved)
 
 	// getters and setters

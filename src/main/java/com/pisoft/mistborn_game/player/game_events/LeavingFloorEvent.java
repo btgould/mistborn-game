@@ -3,7 +3,7 @@ package com.pisoft.mistborn_game.player.game_events;
 import com.pisoft.mistborn_game.player.actions.AirAccAction;
 
 // TODO: does not prevent SlidingEvent on the same frame when sliding off ledge 
-public class StartFallEvent extends GameEvent {
+public class LeavingFloorEvent extends GameEvent {
 	@Override
 	public void resolve() {
 		targetPlayer.setFalling(true);
@@ -19,5 +19,14 @@ public class StartFallEvent extends GameEvent {
 		if (targetPlayer.wantsToAccelerate()) {
 			dispatchEvent(new AirAccAction(targetPlayer.getFacingSide()));
 		}
+	}
+	
+	@Override
+	public boolean isCompatible(GameEvent other) {
+		if (other instanceof FinishLandingEvent) {
+			return false;
+		}
+		
+		return true;
 	}
 }

@@ -13,13 +13,9 @@ public class WallJumpAction extends PlayerAction {
 	
 	@Override
 	public void resolve() {
-		targetPlayer.setSliding(false);
-		targetPlayer.setGrounded(false);
-		targetPlayer.setLanding(false);
 		targetPlayer.setJumping(false);
 		targetPlayer.setDoubleJumping(false);
 		targetPlayer.setWallJumping(true);
-		targetPlayer.setFalling(true);
 		targetPlayer.setCrouching(false);
 		targetPlayer.setAtWall(false);
 		targetPlayer.setWallPushing(false);

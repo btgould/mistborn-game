@@ -14,13 +14,4 @@ public class ShortenJumpAction extends PlayerAction {
 
 		targetPlayer.setySpeed(PlatformingConstants.getShortJumpSpeed());
 	}
-	
-	@Override
-	public boolean isCompatible(PlayerAction action) {
-		if (action instanceof JumpAction) {
-			return false;
-		}
-		
-		return true;
-	}
 }

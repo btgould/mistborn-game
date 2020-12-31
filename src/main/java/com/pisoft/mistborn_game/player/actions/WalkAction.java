@@ -21,9 +21,6 @@ public class WalkAction extends PlayerAction {
 		targetPlayer.setWalking(true);
 		targetPlayer.setRunning(false);
 		targetPlayer.setSliding(false);
-		targetPlayer.setAtWall(false);
-		targetPlayer.setWallPushing(false);
-		targetPlayer.setWallSide(Side.NONE);
 
 		// player must be facing either LEFT or RIGHT
 		double accMultiplier = (targetPlayer.getFacingSide() == Side.RIGHT) ? 1 : -1;

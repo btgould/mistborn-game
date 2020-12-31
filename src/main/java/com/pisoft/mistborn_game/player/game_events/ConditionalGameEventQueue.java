@@ -39,12 +39,23 @@ public class ConditionalGameEventQueue<T extends GameEvent> extends GameEventQue
 	 * Constructs a new <code>ConditionalGameEventQueue</code> with the specified
 	 * condition and sorting behavior.
 	 * 
-	 * @param comp The comparator to use when sorting the queue
+	 * @param comp      The comparator to use when sorting the queue
 	 * @param condition The condition to be associated with this queue
 	 */
 	public ConditionalGameEventQueue(Comparator<T> comp, Predicate<T> condition) {
 		super(comp);
 		this.condition = condition;
+	}
+
+	/**
+	 * Creates a new <code>ConditionalGameEventQueue</code> with the same condition
+	 * and sorting behavior as another queue.
+	 * 
+	 * @param other
+	 */
+	public ConditionalGameEventQueue(ConditionalGameEventQueue<T> other) {
+		setComp(other.getComp());
+		setCondition(other.getCondition());
 	}
 
 	/**

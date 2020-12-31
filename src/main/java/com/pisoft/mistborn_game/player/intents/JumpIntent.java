@@ -2,7 +2,9 @@ package com.pisoft.mistborn_game.player.intents;
 
 import com.pisoft.mistborn_game.player.actions.DoubleJumpAction;
 import com.pisoft.mistborn_game.player.actions.JumpAction;
+import com.pisoft.mistborn_game.player.actions.PlayerAction;
 import com.pisoft.mistborn_game.player.actions.WallJumpAction;
+import com.pisoft.mistborn_game.player.game_events.GameEvent;
 
 public class JumpIntent extends PlayerIntent {
 	
@@ -35,5 +37,19 @@ public class JumpIntent extends PlayerIntent {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public boolean isCompatible(GameEvent other) {
+		if (other instanceof CrouchIntent) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	@Override
+	public Class<? extends PlayerAction> isEndedBy() {
+		return StopJumpIntent.class;
 	}
 }

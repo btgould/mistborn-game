@@ -2,7 +2,9 @@ package com.pisoft.mistborn_game.player.constants;
 
 import java.util.HashMap;
 
-import com.pisoft.mistborn_game.player.actions.*;
+import com.pisoft.mistborn_game.player.actions.WalkAction;
+import com.pisoft.mistborn_game.player.actions.WallJumpAction;
+import com.pisoft.mistborn_game.player.game_events.GameEvent;
 
 /**
  * This class serves as a library for constants that determine the number of lag
@@ -19,8 +21,8 @@ import com.pisoft.mistborn_game.player.actions.*;
  * @author gouldb
  *
  */
-public class PlayerActionLagConstants {
-	private static HashMap<Class<? extends PlayerAction>, Integer> lagFrames = new HashMap<Class<? extends PlayerAction>, Integer>();
+public class GameEventLagConstants {
+	private static HashMap<Class<? extends GameEvent>, Integer> lagFrames = new HashMap<>();
 
 	/**
 	 * Adds all mappings between class and lag frames to the map. Before calling this
@@ -30,34 +32,8 @@ public class PlayerActionLagConstants {
 	 * 
 	 */
 	public static void initLagFrames() {
-		lagFrames.put(WalkAction.class, 0);
-		lagFrames.put(RunAction.class, 0);
-		lagFrames.put(AirAccAction.class, 0);
-		lagFrames.put(WallPushAction.class, 0);
-		lagFrames.put(CantAccAction.class, 0);
-
-		lagFrames.put(JumpAction.class, 0);
-		lagFrames.put(DoubleJumpAction.class, 0);
 		lagFrames.put(WallJumpAction.class, 10);
-
-		lagFrames.put(CrouchAction.class, 0);
-		lagFrames.put(CrouchTurnAction.class, 0);
-
-		lagFrames.put(PrepRunAction.class, 0);
-
-		lagFrames.put(SteelPushAction.class, 0);
-
-		lagFrames.put(StopAccAction.class, 0);
-		lagFrames.put(StopWallPushAction.class, 0);
-
-		lagFrames.put(JumpReleaseAction.class, 0);
-		lagFrames.put(ShortenJumpAction.class, 0);
-
-		lagFrames.put(StopCrouchAction.class, 0);
-
-		lagFrames.put(StopPrepRunAction.class, 0);
-
-		lagFrames.put(StopSteelPushAction.class, 0);
+		lagFrames.put(WalkAction.class, 0);
 	}
 
 	// getters and setters
@@ -67,12 +43,12 @@ public class PlayerActionLagConstants {
 	 * 
 	 * @return The <code>HashMap</code> library of lag frames. 
 	 */
-	public static HashMap<Class<? extends PlayerAction>, Integer> getLagFrames() {
+	public static HashMap<Class<? extends GameEvent>, Integer> getLagFrames() {
 		return lagFrames;
 	}
 
-	public static void setLagFrames(HashMap<Class<? extends PlayerAction>, Integer> lagFrames) {
-		PlayerActionLagConstants.lagFrames = lagFrames;
+	public static void setLagFrames(HashMap<Class<? extends GameEvent>, Integer> lagFrames) {
+		GameEventLagConstants.lagFrames = lagFrames;
 	}
 
 }

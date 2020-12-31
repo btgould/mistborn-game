@@ -11,13 +11,4 @@ public class StopWallPushAction extends PlayerAction {
 		targetPlayer.setWantsToAccelerate(false);
 		targetPlayer.setWallPushing(false);
 	}
-	
-	@Override
-	public boolean isCompatible(PlayerAction action) {
-		if (action instanceof WallPushAction) {
-			return false;
-		}
-		
-		return true;
-	}
 }

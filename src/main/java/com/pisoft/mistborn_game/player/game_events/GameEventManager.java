@@ -50,19 +50,16 @@ public class GameEventManager<T extends GameEvent> implements GameEventListener 
 	 * Determines the appropriate way to handle each event in this manager's queues
 	 * and does so.
 	 * <p>
-	 * First, all events that are ready to be removed from any of the buffers are
-	 * harvested and added to the main queue. Then every element in the main queue
-	 * is checked against each buffer's condition (this is needed because (a) new
-	 * events could have been added since that last resolution cycle, and (b) an
-	 * event could meet the condition of multiple buffers). Finally, any events that
-	 * were not moved into a new buffer are resolved and removed from the main
-	 * queue.
+	 * First, some clean up actions are performed. By default, this consists of
+	 * removing the least important set of events for every conflict in the manager,
+	 * but can be overriden to include other things as well. Next, each event is
+	 * checked against every buffer's condition. If it meets any condition, it is
+	 * added into the first buffer whose condition it meets. If it does not meet any
+	 * conditions, it is resolved and removed from the manager.
 	 */
 	public void resolveQueuedEvents() {
-		// check if any delayed events are ready to be resolved
-		for (ConditionalGameEventQueue<T> buffer : getBuffers()) {
-			queuedEvents.addAll(buffer.harvest());
-		}
+
+		cleanUp();
 
 		// handle each event in the main queue
 		mainLoop: while (queuedEvents.size() > 0) {
@@ -79,6 +76,77 @@ public class GameEventManager<T extends GameEvent> implements GameEventListener 
 			// if it gets here, event can be resolved --> resolve it
 			resolve(event);
 		}
+	}
+
+	/**
+	 * Prepares the manager for event resolution. If any special conditions should
+	 * be checked before resolution, the subclass that wishes to check them should
+	 * override this method.
+	 * <p>
+	 * By default, ensures that no event that is ready to be resolved has any
+	 * conflicts present in this manager.
+	 * <p>
+	 * For each event about to be resolved, the entire manager (including buffers)
+	 * is scanned, and every conflicting event is found. Then, the priority of the
+	 * event is compared to that of its conflicts. If any conflict has a strictly
+	 * higher priority than the event about to be resolved, the event is removed
+	 * from the manager. Otherwise, all conflicts are removed from the manager.
+	 * <p>
+	 * In order to efficiently scan across all buffers, buffered events are removed
+	 * from whatever buffer they were in and moved into a temporary list. The final
+	 * version of this list (with all conflicts removed) is then added back into the
+	 * main queue. This means that after calling this method, there will be events
+	 * in the main queue that actually belong in a buffer. In practice, this should
+	 * not be a problem, because events are always checked for buffer conditions
+	 * before resolution anyways.
+	 */
+	protected void cleanUp() {
+		// move all events into centralized location
+		ArrayList<T> events = new ArrayList<>();
+
+		for (ConditionalGameEventQueue<T> buffer : getBuffers()) {
+			queuedEvents.addAll(buffer.harvest()); // any events ready to be resolved go to main queue
+			events.addAll(buffer.filter(e -> true)); // else go to general list
+		}
+
+		events.addAll(queuedEvents.find(e -> true)); // keep list of events about to be resolved
+
+		// check conflicts for all events that are about to be resolved
+		// NOTE: I think this might be wrong for events that will go into a buffer but
+		// are on their first cycle in the manager.
+		while (queuedEvents.size() > 0) {
+			// get event to process
+			T event = queuedEvents.deque();
+			ArrayList<T> conflicts = new ArrayList<T>();
+
+			// find all conflicts of processed event
+			for (T queued : events) {
+				if (!event.isCompatible(queued)) {
+					conflicts.add(queued);
+				}
+			}
+
+			boolean eventImportant = true;
+
+			// if any conflict is more important than the event, event should be disarded
+			for (T conflict : conflicts) {
+				if (conflict.getPriority() > event.getPriority()) {
+					eventImportant = false;
+					break;
+				}
+			}
+
+			if (eventImportant) {
+				// event is most important --> keep it, discard conflicts
+				events.removeAll(conflicts);
+			} else {
+				// event is not as important as conflicts --> discard it
+				events.remove(event);
+			}
+		}
+
+		// add all resulting processed events back into queue
+		queuedEvents.addAll(events);
 	}
 
 	/**

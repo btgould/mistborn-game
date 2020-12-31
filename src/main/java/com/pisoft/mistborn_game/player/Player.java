@@ -19,7 +19,7 @@ import com.pisoft.mistborn_game.player.game_events.MaxRunSpeedReachedEvent;
 import com.pisoft.mistborn_game.player.game_events.MaxWalkSpeedReachedEvent;
 import com.pisoft.mistborn_game.player.game_events.SlidingEvent;
 import com.pisoft.mistborn_game.player.game_events.SlowToWalkEvent;
-import com.pisoft.mistborn_game.player.game_events.StartFallEvent;
+import com.pisoft.mistborn_game.player.game_events.LeavingFloorEvent;
 import com.pisoft.mistborn_game.player.state.State;
 import com.pisoft.mistborn_game.player.state.StateManager;
 
@@ -36,7 +36,7 @@ public class Player implements GameEventDispatcher {
 	// describe player state
 	// -----------------------------------------------------------------------------------------------
 	private int lagFrames = 0;
-	
+
 	private State state;
 	private double xPos = 350;
 	private double yPos = 190;
@@ -73,7 +73,7 @@ public class Player implements GameEventDispatcher {
 
 	private Metal targetMetal;
 	private boolean steelPushing;
-	
+
 	private Platform collidedPlatform;
 
 	// -----------------------------------------------------------------------------------------------
@@ -84,9 +84,9 @@ public class Player implements GameEventDispatcher {
 	}
 
 	public void tick() {
-		if (lagFrames != 0) 
+		if (lagFrames != 0)
 			lagFrames--;
-		
+
 		fall();
 		move();
 		setState(stateManager.getNextState(getState()));
@@ -94,152 +94,12 @@ public class Player implements GameEventDispatcher {
 
 	// movement methods
 	// -----------------------------------------------------------------------------------------------
-	private void checkIfFalling() {
-		yPos++;
-
-		if (!collided() && !isFalling()) {
-			dispatchEvent(new StartFallEvent());
-		}
-
-		yPos--;
-	}
-
-	private void checkIfAtWall() {
-		if (getWallSide() != Side.NONE) {
-			Side sideChecked = Side.NONE;
-
-			if (this.getWallSide() == Side.RIGHT) {
-				this.xPos++;
-				sideChecked = Side.RIGHT;
-			} else if (this.getWallSide() == Side.LEFT) {
-				this.xPos--;
-				sideChecked = Side.LEFT;
-			}
-
-			if (!collided()) {
-				dispatchEvent(new LeavingWallEvent(sideChecked));
-			}
-
-			if (sideChecked == Side.RIGHT) {
-				this.xPos--;
-			} else if (sideChecked == Side.LEFT) {
-				this.xPos++;
-			}
-		}
-	}
-
-	// returns true if overlapping with a platform
-	private boolean collided() {
-		// check every platform for collision
-		for (Platform platform : Game.getActiveLevel().getPlatforms()) {
-			boolean onSameX = false;
-			boolean onSameY = false;
-
-			if (this.xPos + this.width + 2 > platform.getxPos()
-					&& platform.getxPos() + platform.getWidth() + 2 > this.xPos) {
-				onSameX = true;
-			}
-
-			if (this.yPos + this.height + 2 > platform.getyPos()
-					&& platform.getyPos() + platform.getHeight() + 2 > this.yPos) {
-				onSameY = true;
-			}
-
-			// if player is in the same space as any platform, return true
-			if (onSameX && onSameY) {
-				setCollidedPlatform(platform);
-				return true;
-			}
-		}
-		// if it gets here, player is not in the same space as any platform, so return
-		// false
-		return false;
-	}
-	
-	private boolean collided(Platform platform) {
-		boolean onSameX = false;
-		boolean onSameY = false;
-
-		if (this.xPos + this.width + 2 > platform.getxPos()
-				&& platform.getxPos() + platform.getWidth() + 2 > this.xPos) {
-			onSameX = true;
-		}
-
-		if (this.yPos + this.height + 2 > platform.getyPos()
-				&& platform.getyPos() + platform.getHeight() + 2 > this.yPos) {
-			onSameY = true;
-		}
-
-		// if player is in the same space as this platform, return true
-		if (onSameX && onSameY) {
-			setCollidedPlatform(platform);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private void handleCollision() {
-		// need while loop here in case player collides with more than one platform in the same frame 
-		while (collided()) {
-
-			boolean causedByX = false;
-			boolean causedByY = false;
-
-			this.xPos -= this.xSpeed;
-			if (collided(getCollidedPlatform())) {
-				// collided without x movement --> collision caused by y movement
-				causedByY = true;
-			}
-			this.xPos += this.xSpeed;
-			this.yPos -= this.ySpeed;
-			if (collided(getCollidedPlatform())) {
-				// collided without y movement --> collision caused by x movement
-				causedByX = true;
-			}
-			this.yPos += this.ySpeed;
-			
-			// collided because of combination of x + y movement, determine based on speed
-			if (!causedByX && !causedByY) {
-				causedByX = Math.abs(getySpeed()) > Math.abs(getxSpeed());
-				causedByY = !causedByX;
-			}
-			
-			if (causedByX) {
-				// player hit a wall
-				if (getxSpeed() > 0) {
-					setxPos(getCollidedPlatform().getxPos() - getWidth() - 2);
-				} else {
-					setxPos(getCollidedPlatform().getxPos() + getCollidedPlatform().getWidth() + 2);
-				}
-				
-				Side direction = (getxSpeed() > 0) ? Side.RIGHT : Side.LEFT;
-				dispatchEvent(new HitWallEvent(direction));
-			}
-			
-			if (causedByY) {
-				// player hit a floor or a ceiling
-				if (this.ySpeed > 0) {
-					setyPos(getCollidedPlatform().getyPos() - getHeight() - 2);
-					
-					dispatchEvent(new HitFloorEvent());
-				} else {
-					setyPos(getCollidedPlatform().getyPos() + getCollidedPlatform().getHeight() + 2);
-					
-					dispatchEvent(new HitCeilingEvent());
-				}
-			}
-
-			setCollidedPlatform(null);
-		}
-	}
-
 	private void fall() {
 		if (this.falling == true) {
 			double oldSpeed = getySpeed();
-			
+
 			this.ySpeed += PlatformingConstants.getGravity();
-			
+
 			if (oldSpeed < 0 && getySpeed() >= 0) {
 				dispatchEvent(new JumpPeakedEvent());
 			}
@@ -269,7 +129,7 @@ public class Player implements GameEventDispatcher {
 			dispatchEvent(new SlowToWalkEvent(direction));
 		}
 	}
-
+	
 	private void accelerate() {
 		if (isGrounded()) {
 			if (isWalking()) {
@@ -297,7 +157,7 @@ public class Player implements GameEventDispatcher {
 	}
 
 	private void doMetalMovement() {
-		if (getTargetMetal() != null && isSteelPushing() == true) {
+		if (getTargetMetal() != null && isSteelPushing()) {
 			// set xPush and yPush based off of relative location to metal
 			double direction = 0;
 			double magnitude = 0;
@@ -323,6 +183,152 @@ public class Player implements GameEventDispatcher {
 			setyPushAmount(0);
 		}
 	}
+	
+	private void handleCollision() {
+		// need while loop here in case player collides with more than one platform in
+		// the same frame
+		while (collided()) {
+
+			boolean causedByX = false;
+			boolean causedByY = false;
+
+			this.xPos -= this.xSpeed;
+			if (collided(getCollidedPlatform())) {
+				// collided without x movement --> collision caused by y movement
+				causedByY = true;
+			}
+			this.xPos += this.xSpeed;
+			this.yPos -= this.ySpeed;
+			if (collided(getCollidedPlatform())) {
+				// collided without y movement --> collision caused by x movement
+				causedByX = true;
+			}
+			this.yPos += this.ySpeed;
+
+			// collided because of combination of x + y movement, determine based on speed
+			if (!causedByX && !causedByY) {
+				causedByX = Math.abs(getySpeed()) > Math.abs(getxSpeed());
+				causedByY = !causedByX;
+			}
+
+			if (causedByX) {
+				// player hit a wall
+				if (getxSpeed() > 0) {
+					setxPos(getCollidedPlatform().getxPos() - getWidth() - 2);
+				} else {
+					setxPos(getCollidedPlatform().getxPos() + getCollidedPlatform().getWidth() + 2);
+				}
+
+				Side direction = (getxSpeed() > 0) ? Side.RIGHT : Side.LEFT;
+				dispatchEvent(new HitWallEvent(direction));
+			}
+
+			if (causedByY) {
+				// player hit a floor or a ceiling
+				if (this.ySpeed > 0) {
+					setyPos(getCollidedPlatform().getyPos() - getHeight() - 2);
+
+					dispatchEvent(new HitFloorEvent());
+				} else {
+					setyPos(getCollidedPlatform().getyPos() + getCollidedPlatform().getHeight() + 2);
+
+					dispatchEvent(new HitCeilingEvent());
+				}
+			}
+
+			setCollidedPlatform(null);
+		}
+	}
+
+	private void checkIfFalling() {
+		yPos++;
+
+		if (!collided() && !isFalling()) {
+			dispatchEvent(new LeavingFloorEvent());
+		}
+
+		yPos--;
+	}
+
+	private void checkIfAtWall() {
+		if (getWallSide() != Side.NONE) {
+			Side sideChecked = Side.NONE;
+
+			if (this.getWallSide() == Side.RIGHT) {
+				this.xPos++;
+				sideChecked = Side.RIGHT;
+			} else if (this.getWallSide() == Side.LEFT) {
+				this.xPos--;
+				sideChecked = Side.LEFT;
+			}
+
+			if (!collided()) {
+				dispatchEvent(new LeavingWallEvent(sideChecked));
+			}
+
+			if (sideChecked == Side.RIGHT) {
+				this.xPos--;
+			} else if (sideChecked == Side.LEFT) {
+				this.xPos++;
+			}
+		}
+	}
+
+	/**
+	 * Checks if the player is overlapping with any <code>Platform</code> in the
+	 * active level.
+	 * <p>
+	 * If and when the first collided <code>Platform</code> is found, the method
+	 * sets it as the current collided <code>Platform</code> and returns. Thus, it
+	 * cannot safely check for collision against a specific platform because it may
+	 * return before it is found.
+	 * 
+	 * @return <code>true</code> if the player is collided with any
+	 *         <code>Platform</code>, <code>false</code> otherwise
+	 */
+	private boolean collided() {
+		// check every platform for collision
+		for (Platform platform : Game.getActiveLevel().getPlatforms()) {
+			// if player is in the same space as any platform, return true
+			if (collided(platform)) {
+				setCollidedPlatform(platform);
+				return true;
+			}
+		}
+		// if it gets here, player is not in the same space as any platform, so return
+		// false
+		return false;
+	}
+
+	/**
+	 * Checks if the player is overlapping with the specific <code>Platform</code>
+	 * passed as an argument
+	 * 
+	 * @param platform The <code>Platform</code> to check collision with
+	 * @return <code>true</code> if the player is collided with the specified
+	 *         <code>Platform</code>, <code>false</code> otherwise
+	 */
+	private boolean collided(Platform platform) {
+		boolean onSameX = false;
+		boolean onSameY = false;
+
+		if (this.xPos + this.width + 2 > platform.getxPos()
+				&& platform.getxPos() + platform.getWidth() + 2 > this.xPos) {
+			onSameX = true;
+		}
+
+		if (this.yPos + this.height + 2 > platform.getyPos()
+				&& platform.getyPos() + platform.getHeight() + 2 > this.yPos) {
+			onSameY = true;
+		}
+
+		// if player is in the same space as this platform, return true
+		if (onSameX && onSameY) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	// register methods
 	// -----------------------------------------------------------------------------------------------
@@ -340,7 +346,7 @@ public class Player implements GameEventDispatcher {
 	public void setLagFrames(int lagFrames) {
 		this.lagFrames = lagFrames;
 	}
-	
+
 	public State getState() {
 		return state;
 	}
